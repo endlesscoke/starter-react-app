@@ -7,7 +7,8 @@
     "dev": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "bot": "node telegram-bot.js"
   },
   "eslintConfig": {
     "extends": [
@@ -28,7 +29,9 @@
     ]
   },
   "dependencies": {
-    "express": "^4.17.3"
+    "dotenv": "^17.2.3",
+    "express": "^4.17.3",
+    "node-telegram-bot-api": "^0.66.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^5.16.2",

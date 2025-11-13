@@ -4,6 +4,22 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## 🤖 Telegram Bot
+
+This project now includes a **Telegram Bot** with user registration functionality!
+
+👉 **[View Telegram Bot Documentation](TELEGRAM_BOT.md)**
+
+Quick start:
+```bash
+# Configure your bot token
+cp .env.example .env
+# Edit .env and add your TELEGRAM_BOT_TOKEN
+
+# Run the bot
+npm run bot
+```
+
 ## Available Scripts
 
 In the project directory, you can run:
