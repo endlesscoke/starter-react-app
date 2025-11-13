@@ -15,90 +15,171 @@ if (!token) {
 // Create bot instance
 const bot = new TelegramBot(token, { polling: true });
 
-// Path to users data file
+// Path to data files
 const usersFilePath = path.join(__dirname, 'users.json');
+const productsFilePath = path.join(__dirname, 'products.json');
+const ordersFilePath = path.join(__dirname, 'orders.json');
 
-// Initialize users storage
+// Initialize storage
 let users = {};
+let products = [];
+let orders = [];
+
+// Admin user IDs (add your Telegram user ID here)
+const ADMIN_IDS = process.env.ADMIN_IDS ? process.env.ADMIN_IDS.split(',').map(id => parseInt(id.trim())) : [];
 
 // Translations for multi-language support
 const translations = {
   en: {
-    welcome: '👋 Welcome to the Registration Bot!\n\nPlease select your language:',
-    languageSelected: '✅ Language selected: English\n\nNow, please select your region:',
+    welcome: '👋 Welcome to the Order Bot!\n\nPlease select your language:',
+    languageSelected: '✅ Language selected: English',
     regionSelected: '✅ Region selected!\n\nPlease enter your full name:',
     enterName: 'Please enter your full name:',
-    enterEmail: '✅ Name saved!\n\nNow, please enter your email address:',
-    alreadyRegistered: '✅ You are already registered!\n\nUse the menu to view your information.',
+    nameSaved: '✅ Name saved!',
+    alreadyRegistered: '✅ You are already registered!\n\nUse the menu to place orders.',
     registrationCancelled: '❌ Registration cancelled.',
     registrationComplete: '🎉 Registration Complete!\n\nYour account has been successfully created.',
-    myInfo: '✅ Your Registration Information:',
+    myInfo: '✅ Your Information:',
     notRegistered: '❌ You are not registered yet.\n\nUse the menu to register.',
     invalidName: '❌ Please enter a valid name (at least 2 characters).',
-    invalidEmail: '❌ Please enter a valid email address.',
     menuRegister: '📝 Register',
     menuMyInfo: '👤 My Info',
     menuLanguage: '🌐 Language',
+    menuPlaceOrder: '🛒 Place Order',
     menuCancel: '❌ Cancel',
     name: 'Name',
-    email: 'Email',
     language: 'Language',
     region: 'Region',
     registered: 'Registered',
-    userId: 'User ID'
+    userId: 'User ID',
+    selectProduct: 'Please select a product:',
+    enterAddress: 'Please enter delivery address:',
+    enterTime: 'Please enter delivery time (e.g., 14:00 or 2:00 PM):',
+    orderPlaced: '✅ Order placed successfully!',
+    orderCancelled: '❌ Order cancelled.',
+    noProducts: '❌ No products available. Please contact administrator.',
+    invalidAddress: '❌ Please enter a valid address.',
+    invalidTime: '❌ Please enter a valid time.',
+    orderDetails: '📦 Order Details:',
+    product: 'Product',
+    address: 'Address',
+    time: 'Time',
+    status: 'Status',
+    orderNumber: 'Order #',
+    // Admin
+    adminMenu: '🔧 Admin Menu',
+    adminAddProduct: '➕ Add Product',
+    adminRemoveProduct: '➖ Remove Product',
+    adminViewOrders: '📋 View Orders',
+    adminBackToMain: '⬅️ Back to Main Menu',
+    enterProductName: 'Enter product name:',
+    productAdded: '✅ Product added successfully!',
+    productRemoved: '✅ Product removed successfully!',
+    selectProductToRemove: 'Select product to remove:',
+    noProductsToRemove: 'No products to remove.'
   },
   ru: {
-    welcome: '👋 Добро пожаловать в Бот Регистрации!\n\nПожалуйста, выберите язык:',
-    languageSelected: '✅ Язык выбран: Русский\n\nТеперь выберите регион:',
+    welcome: '👋 Добро пожаловать в Бот Заказов!\n\nПожалуйста, выберите язык:',
+    languageSelected: '✅ Язык выбран: Русский',
     regionSelected: '✅ Регион выбран!\n\nПожалуйста, введите ваше полное имя:',
     enterName: 'Пожалуйста, введите ваше полное имя:',
-    enterEmail: '✅ Имя сохранено!\n\nТеперь введите ваш email адрес:',
-    alreadyRegistered: '✅ Вы уже зарегистрированы!\n\nИспользуйте меню для просмотра информации.',
+    nameSaved: '✅ Имя сохранено!',
+    alreadyRegistered: '✅ Вы уже зарегистрированы!\n\nИспользуйте меню для оформления заказов.',
     registrationCancelled: '❌ Регистрация отменена.',
     registrationComplete: '🎉 Регистрация завершена!\n\nВаш аккаунт успешно создан.',
-    myInfo: '✅ Ваша регистрационная информация:',
+    myInfo: '✅ Ваша информация:',
     notRegistered: '❌ Вы еще не зарегистрированы.\n\nИспользуйте меню для регистрации.',
     invalidName: '❌ Пожалуйста, введите корректное имя (минимум 2 символа).',
-    invalidEmail: '❌ Пожалуйста, введите корректный email адрес.',
     menuRegister: '📝 Регистрация',
     menuMyInfo: '👤 Моя информация',
     menuLanguage: '🌐 Язык',
+    menuPlaceOrder: '🛒 Оформить заказ',
     menuCancel: '❌ Отмена',
     name: 'Имя',
-    email: 'Email',
     language: 'Язык',
     region: 'Регион',
     registered: 'Зарегистрирован',
-    userId: 'ID пользователя'
+    userId: 'ID пользователя',
+    selectProduct: 'Пожалуйста, выберите товар:',
+    enterAddress: 'Пожалуйста, введите адрес доставки:',
+    enterTime: 'Пожалуйста, введите время доставки (например, 14:00 или 2:00 PM):',
+    orderPlaced: '✅ Заказ успешно оформлен!',
+    orderCancelled: '❌ Заказ отменен.',
+    noProducts: '❌ Нет доступных товаров. Пожалуйста, свяжитесь с администратором.',
+    invalidAddress: '❌ Пожалуйста, введите корректный адрес.',
+    invalidTime: '❌ Пожалуйста, введите корректное время.',
+    orderDetails: '📦 Детали заказа:',
+    product: 'Товар',
+    address: 'Адрес',
+    time: 'Время',
+    status: 'Статус',
+    orderNumber: 'Заказ №',
+    // Admin
+    adminMenu: '🔧 Меню администратора',
+    adminAddProduct: '➕ Добавить товар',
+    adminRemoveProduct: '➖ Удалить товар',
+    adminViewOrders: '📋 Просмотр заказов',
+    adminBackToMain: '⬅️ Назад в главное меню',
+    enterProductName: 'Введите название товара:',
+    productAdded: '✅ Товар успешно добавлен!',
+    productRemoved: '✅ Товар успешно удален!',
+    selectProductToRemove: 'Выберите товар для удаления:',
+    noProductsToRemove: 'Нет товаров для удаления.'
   },
   et: {
-    welcome: '👋 Tere tulemast registreerimise botti!\n\nPalun valige keel:',
-    languageSelected: '✅ Keel valitud: Eesti\n\nNüüd valige oma piirkond:',
+    welcome: '👋 Tere tulemast tellimuste botti!\n\nPalun valige keel:',
+    languageSelected: '✅ Keel valitud: Eesti',
     regionSelected: '✅ Piirkond valitud!\n\nPalun sisestage oma täisnimi:',
     enterName: 'Palun sisestage oma täisnimi:',
-    enterEmail: '✅ Nimi salvestatud!\n\nNüüd sisestage oma e-posti aadress:',
-    alreadyRegistered: '✅ Olete juba registreeritud!\n\nKasutage menüüd oma teabe vaatamiseks.',
+    nameSaved: '✅ Nimi salvestatud!',
+    alreadyRegistered: '✅ Olete juba registreeritud!\n\nKasutage menüüd tellimuste tegemiseks.',
     registrationCancelled: '❌ Registreerimine tühistatud.',
     registrationComplete: '🎉 Registreerimine lõpetatud!\n\nTeie konto on edukalt loodud.',
-    myInfo: '✅ Teie registreerimise teave:',
+    myInfo: '✅ Teie teave:',
     notRegistered: '❌ Te ei ole veel registreeritud.\n\nKasutage menüüd registreerimiseks.',
     invalidName: '❌ Palun sisestage kehtiv nimi (vähemalt 2 tähemärki).',
-    invalidEmail: '❌ Palun sisestage kehtiv e-posti aadress.',
     menuRegister: '📝 Registreeri',
     menuMyInfo: '👤 Minu info',
     menuLanguage: '🌐 Keel',
+    menuPlaceOrder: '🛒 Tee tellimus',
     menuCancel: '❌ Tühista',
     name: 'Nimi',
-    email: 'E-post',
     language: 'Keel',
     region: 'Piirkond',
     registered: 'Registreeritud',
-    userId: 'Kasutaja ID'
+    userId: 'Kasutaja ID',
+    selectProduct: 'Palun valige toode:',
+    enterAddress: 'Palun sisestage tarneaadress:',
+    enterTime: 'Palun sisestage tarneaeg (nt 14:00 või 2:00 PM):',
+    orderPlaced: '✅ Tellimus edukalt esitatud!',
+    orderCancelled: '❌ Tellimus tühistatud.',
+    noProducts: '❌ Tooteid pole saadaval. Palun võtke ühendust administraatoriga.',
+    invalidAddress: '❌ Palun sisestage kehtiv aadress.',
+    invalidTime: '❌ Palun sisestage kehtiv aeg.',
+    orderDetails: '📦 Tellimuse üksikasjad:',
+    product: 'Toode',
+    address: 'Aadress',
+    time: 'Aeg',
+    status: 'Olek',
+    orderNumber: 'Tellimus #',
+    // Admin
+    adminMenu: '🔧 Administraatori menüü',
+    adminAddProduct: '➕ Lisa toode',
+    adminRemoveProduct: '➖ Eemalda toode',
+    adminViewOrders: '📋 Vaata tellimusi',
+    adminBackToMain: '⬅️ Tagasi peamenüüsse',
+    enterProductName: 'Sisestage toote nimi:',
+    productAdded: '✅ Toode edukalt lisatud!',
+    productRemoved: '✅ Toode edukalt eemaldatud!',
+    selectProductToRemove: 'Valige eemaldatav toode:',
+    noProductsToRemove: 'Pole tooteid eemaldamiseks.'
   }
 };
 
-// Store user preferences (language)
+// Store user preferences (language) and states
 const userPreferences = {};
+const orderStates = {};
+const adminStates = {};
 
 // Load existing users from file
 function loadUsers() {
@@ -123,6 +204,57 @@ function saveUsers() {
   }
 }
 
+// Load products from file
+function loadProducts() {
+  try {
+    if (fs.existsSync(productsFilePath)) {
+      const data = fs.readFileSync(productsFilePath, 'utf8');
+      products = JSON.parse(data);
+      console.log('Loaded products:', products.length);
+    }
+  } catch (error) {
+    console.error('Error loading products:', error.message);
+    products = [];
+  }
+}
+
+// Save products to file
+function saveProducts() {
+  try {
+    fs.writeFileSync(productsFilePath, JSON.stringify(products, null, 2));
+  } catch (error) {
+    console.error('Error saving products:', error.message);
+  }
+}
+
+// Load orders from file
+function loadOrders() {
+  try {
+    if (fs.existsSync(ordersFilePath)) {
+      const data = fs.readFileSync(ordersFilePath, 'utf8');
+      orders = JSON.parse(data);
+      console.log('Loaded orders:', orders.length);
+    }
+  } catch (error) {
+    console.error('Error loading orders:', error.message);
+    orders = [];
+  }
+}
+
+// Save orders to file
+function saveOrders() {
+  try {
+    fs.writeFileSync(ordersFilePath, JSON.stringify(orders, null, 2));
+  } catch (error) {
+    console.error('Error saving orders:', error.message);
+  }
+}
+
+// Check if user is admin
+function isAdmin(userId) {
+  return ADMIN_IDS.includes(userId);
+}
+
 // Get user's language preference
 function getUserLanguage(userId) {
   return userPreferences[userId] || users[userId]?.language || 'en';
@@ -134,8 +266,10 @@ function t(userId, key) {
   return translations[lang][key] || translations.en[key];
 }
 
-// Load users on startup
+// Load data on startup
 loadUsers();
+loadProducts();
+loadOrders();
 
 // Store registration state for each user
 const registrationStates = {};
@@ -143,11 +277,36 @@ const registrationStates = {};
 // Create main menu keyboard
 function getMainMenuKeyboard(userId) {
   const lang = getUserLanguage(userId);
+  const keyboard = [];
+  
+  if (!users[userId]) {
+    keyboard.push([{ text: translations[lang].menuRegister }]);
+  } else {
+    keyboard.push([{ text: translations[lang].menuPlaceOrder }]);
+    keyboard.push([{ text: translations[lang].menuMyInfo }]);
+  }
+  
+  keyboard.push([{ text: translations[lang].menuLanguage }]);
+  
+  if (isAdmin(userId)) {
+    keyboard.push([{ text: translations[lang].adminMenu }]);
+  }
+  
+  return {
+    keyboard: keyboard,
+    resize_keyboard: true
+  };
+}
+
+// Create admin menu keyboard
+function getAdminMenuKeyboard(userId) {
+  const lang = getUserLanguage(userId);
   return {
     keyboard: [
-      [{ text: translations[lang].menuRegister }],
-      [{ text: translations[lang].menuMyInfo }],
-      [{ text: translations[lang].menuLanguage }]
+      [{ text: translations[lang].adminAddProduct }],
+      [{ text: translations[lang].adminRemoveProduct }],
+      [{ text: translations[lang].adminViewOrders }],
+      [{ text: translations[lang].adminBackToMain }]
     ],
     resize_keyboard: true
   };
@@ -182,6 +341,36 @@ function getRegionKeyboard(userId) {
   };
 }
 
+// Create product selection keyboard
+function getProductKeyboard(userId) {
+  if (products.length === 0) {
+    return null;
+  }
+  
+  const buttons = products.map((product, index) => {
+    return [{ text: product.name, callback_data: `product_${index}` }];
+  });
+  
+  return {
+    inline_keyboard: buttons
+  };
+}
+
+// Create product removal keyboard for admin
+function getProductRemovalKeyboard() {
+  if (products.length === 0) {
+    return null;
+  }
+  
+  const buttons = products.map((product, index) => {
+    return [{ text: `❌ ${product.name}`, callback_data: `remove_product_${index}` }];
+  });
+  
+  return {
+    inline_keyboard: buttons
+  };
+}
+
 // Command: /start
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
@@ -204,10 +393,7 @@ bot.on('callback_query', (query) => {
     const lang = data.split('_')[1];
     userPreferences[userId] = lang;
     
-    // Answer callback query to remove loading state
     bot.answerCallbackQuery(query.id);
-    
-    // Show main menu after language selection
     bot.sendMessage(chatId, t(userId, 'languageSelected'), {
       reply_markup: getMainMenuKeyboard(userId)
     });
@@ -222,6 +408,40 @@ bot.on('callback_query', (query) => {
       
       bot.answerCallbackQuery(query.id);
       bot.sendMessage(chatId, t(userId, 'regionSelected'));
+    }
+  }
+  // Handle product selection during order
+  else if (data.startsWith('product_')) {
+    const productIndex = parseInt(data.split('_')[1]);
+    
+    if (orderStates[userId] && products[productIndex]) {
+      orderStates[userId].product = products[productIndex].name;
+      orderStates[userId].step = 'address';
+      
+      bot.answerCallbackQuery(query.id);
+      bot.sendMessage(chatId, t(userId, 'enterAddress'));
+    }
+  }
+  // Handle product removal by admin
+  else if (data.startsWith('remove_product_')) {
+    if (!isAdmin(userId)) {
+      bot.answerCallbackQuery(query.id, { text: 'Access denied' });
+      return;
+    }
+    
+    const productIndex = parseInt(data.split('_')[2]);
+    
+    if (products[productIndex]) {
+      const productName = products[productIndex].name;
+      products.splice(productIndex, 1);
+      saveProducts();
+      
+      bot.answerCallbackQuery(query.id);
+      bot.sendMessage(chatId, t(userId, 'productRemoved'), {
+        reply_markup: getAdminMenuKeyboard(userId)
+      });
+      
+      delete adminStates[userId];
     }
   }
 });
@@ -253,18 +473,80 @@ bot.on('message', (msg) => {
       reply_markup: getLanguageKeyboard()
     });
     return;
+  } else if (text === translations[lang].menuPlaceOrder) {
+    startOrder(chatId, userId);
+    return;
+  } else if (text === translations[lang].adminMenu) {
+    if (isAdmin(userId)) {
+      bot.sendMessage(chatId, t(userId, 'adminMenu'), {
+        reply_markup: getAdminMenuKeyboard(userId)
+      });
+    }
+    return;
+  } else if (text === translations[lang].adminAddProduct) {
+    if (isAdmin(userId)) {
+      adminStates[userId] = { action: 'add_product' };
+      bot.sendMessage(chatId, t(userId, 'enterProductName'));
+    }
+    return;
+  } else if (text === translations[lang].adminRemoveProduct) {
+    if (isAdmin(userId)) {
+      const keyboard = getProductRemovalKeyboard();
+      if (keyboard) {
+        adminStates[userId] = { action: 'remove_product' };
+        bot.sendMessage(chatId, t(userId, 'selectProductToRemove'), {
+          reply_markup: keyboard
+        });
+      } else {
+        bot.sendMessage(chatId, t(userId, 'noProductsToRemove'), {
+          reply_markup: getAdminMenuKeyboard(userId)
+        });
+      }
+    }
+    return;
+  } else if (text === translations[lang].adminViewOrders) {
+    if (isAdmin(userId)) {
+      showAllOrders(chatId, userId);
+    }
+    return;
+  } else if (text === translations[lang].adminBackToMain) {
+    bot.sendMessage(chatId, t(userId, 'languageSelected'), {
+      reply_markup: getMainMenuKeyboard(userId)
+    });
+    delete adminStates[userId];
+    return;
   } else if (text === translations[lang].menuCancel) {
     if (registrationStates[userId]) {
       delete registrationStates[userId];
       bot.sendMessage(chatId, t(userId, 'registrationCancelled'), {
         reply_markup: getMainMenuKeyboard(userId)
       });
+    } else if (orderStates[userId]) {
+      delete orderStates[userId];
+      bot.sendMessage(chatId, t(userId, 'orderCancelled'), {
+        reply_markup: getMainMenuKeyboard(userId)
+      });
     }
     return;
   }
 
+  // Handle admin input
+  if (adminStates[userId]) {
+    handleAdminInput(chatId, userId, text);
+    return;
+  }
+
+  // Handle order flow
+  if (orderStates[userId]) {
+    handleOrderInput(chatId, userId, text);
+    return;
+  }
+
   // Handle registration flow
-  handleRegistrationInput(chatId, userId, text);
+  if (registrationStates[userId]) {
+    handleRegistrationInput(chatId, userId, text);
+    return;
+  }
 });
 
 // Start registration process
@@ -306,7 +588,6 @@ function showUserInfo(chatId, userId) {
 ${t(userId, 'myInfo')}
 
 👤 ${t(userId, 'name')}: ${user.name}
-📧 ${t(userId, 'email')}: ${user.email}
 🌐 ${t(userId, 'language')}: ${langNames[user.language] || user.language}
 📍 ${t(userId, 'region')}: ${regionNames[user.region] || user.region}
 📅 ${t(userId, 'registered')}: ${new Date(user.registeredAt).toLocaleString()}
@@ -320,7 +601,6 @@ ${t(userId, 'myInfo')}
 
 // Handle registration input
 function handleRegistrationInput(chatId, userId, text) {
-  // Check if user is in registration process
   if (!registrationStates[userId]) {
     return;
   }
@@ -335,26 +615,13 @@ function handleRegistrationInput(chatId, userId, text) {
     }
 
     state.data.name = text.trim();
-    state.step = 'email';
     
-    bot.sendMessage(chatId, t(userId, 'enterEmail'));
-  } else if (state.step === 'email') {
-    // Validate email (basic validation)
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(text)) {
-      bot.sendMessage(chatId, t(userId, 'invalidEmail'));
-      return;
-    }
-
-    state.data.email = text.trim();
-    
-    // Complete registration
+    // Complete registration (no email needed)
     const lang = getUserLanguage(userId);
     users[userId] = {
       userId: userId,
       username: state.username || 'user',
       name: state.data.name,
-      email: state.data.email,
       language: lang,
       region: state.data.region,
       registeredAt: new Date().toISOString()
@@ -373,7 +640,6 @@ function handleRegistrationInput(chatId, userId, text) {
 ${t(userId, 'registrationComplete')}
 
 👤 ${t(userId, 'name')}: ${state.data.name}
-📧 ${t(userId, 'email')}: ${state.data.email}
 🌐 ${t(userId, 'language')}: ${langNames[lang]}
 📍 ${t(userId, 'region')}: ${regionNames[state.data.region]}
     `.trim();
@@ -382,6 +648,155 @@ ${t(userId, 'registrationComplete')}
       reply_markup: getMainMenuKeyboard(userId)
     });
   }
+}
+
+// Start order process
+function startOrder(chatId, userId) {
+  if (!users[userId]) {
+    bot.sendMessage(chatId, t(userId, 'notRegistered'), {
+      reply_markup: getMainMenuKeyboard(userId)
+    });
+    return;
+  }
+
+  if (products.length === 0) {
+    bot.sendMessage(chatId, t(userId, 'noProducts'), {
+      reply_markup: getMainMenuKeyboard(userId)
+    });
+    return;
+  }
+
+  // Initialize order state
+  orderStates[userId] = {
+    step: 'product',
+    data: {}
+  };
+
+  // Show product selection
+  bot.sendMessage(chatId, t(userId, 'selectProduct'), {
+    reply_markup: getProductKeyboard(userId)
+  });
+}
+
+// Handle order input
+function handleOrderInput(chatId, userId, text) {
+  if (!orderStates[userId]) {
+    return;
+  }
+
+  const state = orderStates[userId];
+
+  if (state.step === 'address') {
+    // Validate address
+    if (!text || text.trim().length < 5) {
+      bot.sendMessage(chatId, t(userId, 'invalidAddress'));
+      return;
+    }
+
+    state.data.address = text.trim();
+    state.step = 'time';
+    
+    bot.sendMessage(chatId, t(userId, 'enterTime'));
+  } else if (state.step === 'time') {
+    // Validate time (basic validation)
+    if (!text || text.trim().length < 3) {
+      bot.sendMessage(chatId, t(userId, 'invalidTime'));
+      return;
+    }
+
+    state.data.time = text.trim();
+    
+    // Complete order
+    const order = {
+      orderId: orders.length + 1,
+      userId: userId,
+      userName: users[userId].name,
+      product: state.product,
+      address: state.data.address,
+      time: state.data.time,
+      status: 'pending',
+      createdAt: new Date().toISOString()
+    };
+
+    orders.push(order);
+    saveOrders();
+
+    // Clear order state
+    delete orderStates[userId];
+
+    const successMessage = `
+${t(userId, 'orderPlaced')}
+
+${t(userId, 'orderDetails')}
+${t(userId, 'orderNumber')}: ${order.orderId}
+${t(userId, 'product')}: ${order.product}
+${t(userId, 'address')}: ${order.address}
+${t(userId, 'time')}: ${order.time}
+${t(userId, 'status')}: ${order.status}
+    `.trim();
+
+    bot.sendMessage(chatId, successMessage, {
+      reply_markup: getMainMenuKeyboard(userId)
+    });
+  }
+}
+
+// Handle admin input
+function handleAdminInput(chatId, userId, text) {
+  if (!adminStates[userId]) {
+    return;
+  }
+
+  const state = adminStates[userId];
+
+  if (state.action === 'add_product') {
+    // Validate product name
+    if (!text || text.trim().length < 2) {
+      bot.sendMessage(chatId, 'Product name must be at least 2 characters.');
+      return;
+    }
+
+    const product = {
+      id: products.length + 1,
+      name: text.trim(),
+      addedAt: new Date().toISOString()
+    };
+
+    products.push(product);
+    saveProducts();
+
+    delete adminStates[userId];
+
+    bot.sendMessage(chatId, t(userId, 'productAdded'), {
+      reply_markup: getAdminMenuKeyboard(userId)
+    });
+  }
+}
+
+// Show all orders (admin function)
+function showAllOrders(chatId, userId) {
+  if (orders.length === 0) {
+    bot.sendMessage(chatId, 'No orders yet.', {
+      reply_markup: getAdminMenuKeyboard(userId)
+    });
+    return;
+  }
+
+  let ordersMessage = '📋 All Orders:\n\n';
+  
+  orders.slice(-10).reverse().forEach(order => {
+    ordersMessage += `Order #${order.orderId}\n`;
+    ordersMessage += `👤 ${order.userName}\n`;
+    ordersMessage += `📦 ${order.product}\n`;
+    ordersMessage += `📍 ${order.address}\n`;
+    ordersMessage += `🕐 ${order.time}\n`;
+    ordersMessage += `Status: ${order.status}\n`;
+    ordersMessage += `───────────\n`;
+  });
+
+  bot.sendMessage(chatId, ordersMessage, {
+    reply_markup: getAdminMenuKeyboard(userId)
+  });
 }
 
 

@@ -21,6 +21,8 @@
 
 # telegram bot data
 users.json
+products.json
+orders.json
 
 npm-debug.log*
 yarn-debug.log*
