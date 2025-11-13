@@ -7,10 +7,13 @@ This project includes a Telegram bot that allows users to register and manage th
 ## Features
 
 - ✅ User registration with name and email
+- 🌐 Multi-language support (English, Russian, Estonian)
+- 📍 Region selection (Tallinn, Paldiski)
 - 📋 View registered user information
 - 🔒 Persistent user data storage
-- 💬 Interactive conversation flow
+- 💬 Interactive conversation flow with menu buttons
 - 🛡️ Basic input validation
+- ⌨️ User-friendly keyboard interface
 
 ## Setup Instructions
 
@@ -47,30 +50,59 @@ npm run bot
 
 The bot will start and begin polling for messages.
 
-## Available Commands
+## How to Use
 
-### User Commands
+### Starting the Bot
 
-- `/start` - Start the bot and see the welcome message
-- `/register` - Begin the registration process
-- `/myinfo` - View your registration information
-- `/help` - Display help message with available commands
-- `/cancel` - Cancel the current registration process
+1. Send `/start` command to the bot
+2. Select your preferred language:
+   - 🇬🇧 English
+   - 🇷🇺 Русский (Russian)
+   - 🇪🇪 Eesti (Estonian)
+3. Use the menu buttons to navigate
+
+### Menu Buttons
+
+The bot uses an interactive keyboard menu with the following options:
+
+- **📝 Register / Регистрация / Registreeri** - Start the registration process
+- **👤 My Info / Моя информация / Minu info** - View your registration information
+- **🌐 Language / Язык / Keel** - Change language preference
 
 ## Registration Flow
 
-1. User sends `/register` command
-2. Bot asks for full name
-3. User provides their name
-4. Bot asks for email address
-5. User provides their email
-6. Bot confirms successful registration
+1. User sends `/start` command
+2. User selects language (English, Russian, or Estonian)
+3. User clicks "📝 Register" button from the menu
+4. Bot asks user to select region (Tallinn or Paldiski)
+5. User selects region using inline buttons
+6. Bot asks for full name
+7. User provides their name
+8. Bot asks for email address
+9. User provides their email
+10. Bot confirms successful registration with all details
 
 ### Example Conversation
 
 ```
-User: /register
-Bot: 📝 Let's start the registration process!
+User: /start
+Bot: 👋 Welcome to the Registration Bot!
+     Please select your language:
+     [🇬🇧 English] [🇷🇺 Русский]
+     [🇪🇪 Eesti]
+
+User: [Clicks 🇬🇧 English]
+Bot: ✅ Language selected: English
+     [Menu appears with buttons: 📝 Register | 👤 My Info | 🌐 Language]
+
+User: [Clicks 📝 Register]
+Bot: ✅ Language selected: English
+     Now, please select your region:
+     [🏙️ Tallinn]
+     [🏘️ Paldiski]
+
+User: [Clicks 🏙️ Tallinn]
+Bot: ✅ Region selected!
      Please enter your full name:
 
 User: John Doe
@@ -82,8 +114,8 @@ Bot: 🎉 Registration Complete!
      Your account has been successfully created:
      👤 Name: John Doe
      📧 Email: john.doe@example.com
-     
-     You can view your information anytime using /myinfo
+     🌐 Language: English
+     📍 Region: Tallinn
 ```
 
 ## Data Storage

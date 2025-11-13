@@ -36,37 +36,60 @@ Registered users: 0
 
 ## User Registration Flow
 
-### 1. Starting the Bot
+### 1. Starting the Bot and Selecting Language
 
 **User:** `/start`
 
 **Bot Response:**
 ```
-Welcome to the Registration Bot! 👋
+👋 Welcome to the Registration Bot!
 
-Available commands:
-/register - Register as a new user
-/myinfo - View your registration information
-/help - Show this help message
-/cancel - Cancel current operation
-
-Let's get started! Use /register to begin registration.
+Please select your language:
 ```
+**Inline buttons appear:**
+- 🇬🇧 English
+- 🇷🇺 Русский
+- 🇪🇪 Eesti
 
-### 2. Beginning Registration
-
-**User:** `/register`
+**User clicks:** `🇬🇧 English`
 
 **Bot Response:**
 ```
-📝 Let's start the registration process!
+✅ Language selected: English
+```
+**Menu keyboard appears with buttons:**
+- 📝 Register
+- 👤 My Info
+- 🌐 Language
+
+### 2. Beginning Registration
+
+**User clicks:** `📝 Register` button
+
+**Bot Response:**
+```
+✅ Language selected: English
+
+Now, please select your region:
+```
+**Inline buttons appear:**
+- 🏙️ Tallinn
+- 🏘️ Paldiski
+
+### 3. Selecting Region
+
+**User clicks:** `🏙️ Tallinn`
+
+**Bot Response:**
+```
+✅ Region selected!
 
 Please enter your full name:
 ```
 
-### 3. Entering Name
+### 4. Entering Name
 
-**User:** `John Doe`
+**User types:** `John Doe`
 
 **Bot Response:**
 ```
@@ -75,9 +98,9 @@ Please enter your full name:
 Now, please enter your email address:
 ```
 
-### 4. Entering Email
+### 5. Entering Email
 
-**User:** `john.doe@example.com`
+**User types:** `john.doe@example.com`
 
 **Bot Response:**
 ```
@@ -86,13 +109,13 @@ Now, please enter your email address:
 Your account has been successfully created:
 👤 Name: John Doe
 📧 Email: john.doe@example.com
-
-You can view your information anytime using /myinfo
+🌐 Language: English
+📍 Region: Tallinn
 ```
 
-### 5. Viewing Information
+### 6. Viewing Information
 
-**User:** `/myinfo`
+**User clicks:** `👤 My Info` button
 
 **Bot Response:**
 ```
@@ -100,26 +123,28 @@ You can view your information anytime using /myinfo
 
 👤 Name: John Doe
 📧 Email: john.doe@example.com
+🌐 Language: English
+📍 Region: Tallinn
 📅 Registered: 11/13/2025, 4:30:00 AM
 🆔 User ID: 123456789
 ```
 
-### 6. Getting Help
+### 7. Changing Language
 
-**User:** `/help`
+**User clicks:** `🌐 Language` button
 
 **Bot Response:**
 ```
-📋 Available Commands:
+👋 Welcome to the Registration Bot!
 
-/start - Start the bot and see welcome message
-/register - Register as a new user
-/myinfo - View your registration information
-/help - Show this help message
-/cancel - Cancel current operation
-
-To register, simply type /register and follow the instructions.
+Please select your language:
 ```
+**Inline buttons appear again:**
+- 🇬🇧 English
+- 🇷🇺 Русский
+- 🇪🇪 Eesti
+
+User can select a different language, and all menu buttons will change to the new language.
 
 ## Error Handling
 
@@ -174,6 +199,8 @@ The bot stores user data in `users.json` file:
     "username": "johndoe",
     "name": "John Doe",
     "email": "john.doe@example.com",
+    "language": "en",
+    "region": "tallinn",
     "registeredAt": "2025-11-13T04:30:00.000Z"
   },
   "987654321": {
@@ -181,20 +208,31 @@ The bot stores user data in `users.json` file:
     "username": "janedoe",
     "name": "Jane Doe",
     "email": "jane.doe@example.com",
+    "language": "ru",
+    "region": "paldiski",
     "registeredAt": "2025-11-13T05:15:00.000Z"
   }
 }
 ```
 
-## Command Summary
+## Menu Button Summary
 
-| Command | Description | Status Required |
-|---------|-------------|-----------------|
-| `/start` | Show welcome message | None |
-| `/help` | Display help information | None |
-| `/register` | Begin registration process | Not registered |
-| `/myinfo` | View registration details | Registered |
-| `/cancel` | Cancel current operation | In registration |
+| Button | Description | Status Required |
+|--------|-------------|-----------------|
+| 📝 Register / Регистрация / Registreeri | Begin registration process | Not registered |
+| 👤 My Info / Моя информация / Minu info | View registration details | Registered |
+| 🌐 Language / Язык / Keel | Change language preference | None |
+
+## Available Languages
+
+- 🇬🇧 **English** - Full interface in English
+- 🇷🇺 **Русский** - Полный интерфейс на русском языке
+- 🇪🇪 **Eesti** - Täielik kasutajaliides eesti keeles
+
+## Available Regions
+
+- 🏙️ **Tallinn** - Capital city
+- 🏘️ **Paldiski** - Coastal town
 
 ## Tips
 

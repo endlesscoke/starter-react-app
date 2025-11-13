@@ -8,6 +8,12 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 This project now includes a **Telegram Bot** with user registration functionality!
 
+**Features:**
+- 🌐 Multi-language support (English, Russian, Estonian)
+- 📍 Region selection (Tallinn, Paldiski)
+- ⌨️ Interactive menu-based interface
+- 📝 User registration with email validation
+
 👉 **[View Telegram Bot Documentation](TELEGRAM_BOT.md)**  
 📦 **[Deployment Guide](DEPLOYMENT.md)** - Deploy to VPS, Heroku, Railway, Docker, etc.
 
