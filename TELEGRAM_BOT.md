@@ -1,18 +1,22 @@
-# Telegram Bot - User Registration
+# Telegram Bot - Ordering System
 
-This project includes a Telegram bot that allows users to register and manage their account information.
+This project includes a Telegram bot that allows users to register and place orders with an admin panel for product management.
 
 📦 **[Deployment Guide](DEPLOYMENT.md)** - Learn how to deploy the bot to a server
 
 ## Features
 
-- ✅ User registration with name and email
+- ✅ User registration (name, language, region - no email)
+- 🛒 Order placement system
 - 🌐 Multi-language support (English, Russian, Estonian)
 - 📍 Region selection (Tallinn, Paldiski)
-- 📋 View registered user information
-- 🔒 Persistent user data storage
+- 📦 Product selection from catalog
+- 📋 View user information
+- 🔧 Admin panel for product management
+- 📊 Order tracking and management
+- 🔒 Persistent data storage (users, products, orders)
 - 💬 Interactive conversation flow with menu buttons
-- 🛡️ Basic input validation
+- 🛡️ Input validation
 - ⌨️ User-friendly keyboard interface
 
 ## Setup Instructions
@@ -31,10 +35,16 @@ This project includes a Telegram bot that allows users to register and manage th
    cp .env.example .env
    ```
 
-2. Edit `.env` and add your bot token:
+2. Edit `.env` and add your bot token and admin IDs:
    ```
    TELEGRAM_BOT_TOKEN=your_actual_bot_token_here
+   ADMIN_IDS=123456789,987654321
    ```
+   
+   **To get your Telegram user ID:**
+   - Message [@userinfobot](https://t.me/userinfobot) on Telegram
+   - It will reply with your user ID
+   - Add your ID to ADMIN_IDS (comma-separated for multiple admins)
 
 ### 3. Install Dependencies
 
@@ -65,9 +75,17 @@ The bot will start and begin polling for messages.
 
 The bot uses an interactive keyboard menu with the following options:
 
+**For Unregistered Users:**
 - **📝 Register / Регистрация / Registreeri** - Start the registration process
-- **👤 My Info / Моя информация / Minu info** - View your registration information
 - **🌐 Language / Язык / Keel** - Change language preference
+
+**For Registered Users:**
+- **🛒 Place Order / Оформить заказ / Tee tellimus** - Start ordering process
+- **👤 My Info / Моя информация / Minu info** - View your information
+- **🌐 Language / Язык / Keel** - Change language preference
+
+**For Administrators:**
+- **🔧 Admin Menu / Меню администратора / Administraatori menüü** - Access admin panel
 
 ## Registration Flow
 
@@ -78,22 +96,20 @@ The bot uses an interactive keyboard menu with the following options:
 5. User selects region using inline buttons
 6. Bot asks for full name
 7. User provides their name
-8. Bot asks for email address
-9. User provides their email
-10. Bot confirms successful registration with all details
+8. Bot confirms successful registration
 
-### Example Conversation
+### Registration Example
 
 ```
 User: /start
-Bot: 👋 Welcome to the Registration Bot!
+Bot: 👋 Welcome to the Order Bot!
      Please select your language:
      [🇬🇧 English] [🇷🇺 Русский]
      [🇪🇪 Eesti]
 
 User: [Clicks 🇬🇧 English]
 Bot: ✅ Language selected: English
-     [Menu appears with buttons: 📝 Register | 👤 My Info | 🌐 Language]
+     [Menu appears with buttons: 📝 Register | 🌐 Language]
 
 User: [Clicks 📝 Register]
 Bot: ✅ Language selected: English
@@ -106,25 +122,117 @@ Bot: ✅ Region selected!
      Please enter your full name:
 
 User: John Doe
-Bot: ✅ Name saved!
-     Now, please enter your email address:
-
-User: john.doe@example.com
 Bot: 🎉 Registration Complete!
      Your account has been successfully created:
      👤 Name: John Doe
-     📧 Email: john.doe@example.com
      🌐 Language: English
      📍 Region: Tallinn
 ```
 
+## Ordering Flow
+
+1. User clicks "🛒 Place Order" button
+2. Bot shows available products (inline keyboard)
+3. User selects a product
+4. Bot asks for delivery address
+5. User enters address
+6. Bot asks for delivery time
+7. User enters time
+8. Bot confirms order with details
+
+### Order Example
+
+```
+User: [Clicks 🛒 Place Order]
+Bot: Please select a product:
+     [Product A]
+     [Product B]
+     [Product C]
+
+User: [Clicks Product A]
+Bot: Please enter delivery address:
+
+User: 123 Main St, Tallinn
+Bot: Please enter delivery time (e.g., 14:00 or 2:00 PM):
+
+User: 15:00
+Bot: ✅ Order placed successfully!
+     
+     📦 Order Details:
+     Order #: 1
+     Product: Product A
+     Address: 123 Main St, Tallinn
+     Time: 15:00
+     Status: pending
+```
+
+## Admin Panel
+
+Administrators (configured in `.env` file) have access to additional features:
+
+### Admin Menu Options
+
+- **➕ Add Product** - Add new products to the catalog
+- **➖ Remove Product** - Remove products from the catalog
+- **📋 View Orders** - See all orders placed by users
+- **⬅️ Back to Main Menu** - Return to main menu
+
+### Add Product Example
+
+```
+Admin: [Clicks 🔧 Admin Menu]
+Bot: 🔧 Admin Menu
+     [Shows admin menu buttons]
+
+Admin: [Clicks ➕ Add Product]
+Bot: Enter product name:
+
+Admin: Pizza Margherita
+Bot: ✅ Product added successfully!
+```
+
+### Remove Product Example
+
+```
+Admin: [Clicks ➖ Remove Product]
+Bot: Select product to remove:
+     [❌ Product A]
+     [❌ Product B]
+
+Admin: [Clicks ❌ Product A]
+Bot: ✅ Product removed successfully!
+```
+
+### View Orders Example
+
+```
+Admin: [Clicks 📋 View Orders]
+Bot: 📋 All Orders:
+     
+     Order #1
+     👤 John Doe
+     📦 Product A
+     📍 123 Main St, Tallinn
+     🕐 15:00
+     Status: pending
+     ───────────
+     
+     Order #2
+     👤 Jane Smith
+     📦 Product B
+     📍 456 Oak Ave, Paldiski
+     🕐 18:30
+     Status: pending
+     ───────────
+```
+
 ## Data Storage
 
-User data is stored in `users.json` file in the project root directory. This file is automatically created when the first user registers.
+All data is stored in JSON files in the project root directory. These files are automatically created when needed.
 
-**Note:** The `users.json` file is excluded from version control via `.gitignore` to protect user privacy.
+**Note:** All data files are excluded from version control via `.gitignore` to protect privacy.
 
-### User Data Structure
+### User Data Structure (`users.json`)
 
 ```json
 {
@@ -132,18 +240,55 @@ User data is stored in `users.json` file in the project root directory. This fil
     "userId": 123456789,
     "username": "johndoe",
     "name": "John Doe",
-    "email": "john.doe@example.com",
+    "language": "en",
+    "region": "tallinn",
     "registeredAt": "2025-11-13T04:30:00.000Z"
   }
 }
 ```
 
+### Product Data Structure (`products.json`)
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Product A",
+    "addedAt": "2025-11-13T04:30:00.000Z"
+  },
+  {
+    "id": 2,
+    "name": "Product B",
+    "addedAt": "2025-11-13T04:35:00.000Z"
+  }
+]
+```
+
+### Order Data Structure (`orders.json`)
+
+```json
+[
+  {
+    "orderId": 1,
+    "userId": 123456789,
+    "userName": "John Doe",
+    "product": "Product A",
+    "address": "123 Main St, Tallinn",
+    "time": "15:00",
+    "status": "pending",
+    "createdAt": "2025-11-13T04:40:00.000Z"
+  }
+]
+```
+
 ## Security Considerations
 
 - 🔒 Bot token is stored in `.env` file and not committed to version control
-- 🔒 User data is stored locally and not exposed publicly
-- 🔒 Basic email validation is performed
+- 🔒 Admin IDs configured securely in `.env` file
+- 🔒 User data, products, and orders stored locally and not exposed publicly
+- 🔒 Input validation performed for all user inputs
 - 🔒 Input sanitization for user-provided data
+- 🔒 Admin-only features protected by user ID verification
 
 ## Troubleshooting
 
