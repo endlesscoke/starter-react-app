@@ -8,7 +8,8 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 This project now includes a **Telegram Bot** with user registration functionality!
 
-👉 **[View Telegram Bot Documentation](TELEGRAM_BOT.md)**
+👉 **[View Telegram Bot Documentation](TELEGRAM_BOT.md)**  
+📦 **[Deployment Guide](DEPLOYMENT.md)** - Deploy to VPS, Heroku, Railway, Docker, etc.
 
 Quick start:
 ```bash

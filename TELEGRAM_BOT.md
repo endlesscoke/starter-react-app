@@ -2,6 +2,8 @@
 
 This project includes a Telegram bot that allows users to register and manage their account information.
 
+📦 **[Deployment Guide](DEPLOYMENT.md)** - Learn how to deploy the bot to a server
+
 ## Features
 
 - ✅ User registration with name and email
