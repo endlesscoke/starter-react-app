@@ -827,7 +827,7 @@ bot.on('message', (msg) => {
   } else if (text === translations[lang].adminAddProduct) {
     if (isAdmin(userId)) {
       adminStates[userId] = { action: 'add_product' };
-      bot.sendMessage(chatId, t(userId, 'enterProductName'));
+      bot.sendMessage(chatId, `${t(userId, 'addingProductStep1')}\n${t(userId, 'enterProductName')}`);
     }
     return;
   } else if (text === translations[lang].adminRemoveProduct) {
@@ -849,12 +849,14 @@ bot.on('message', (msg) => {
     if (isAdmin(userId)) {
       // Show category management sub-menu
       bot.sendMessage(chatId, t(userId, 'adminManageCategories'), {
-        keyboard: [
-          [{ text: translations[lang].adminAddCategory }],
-          [{ text: translations[lang].adminRemoveCategory }],
-          [{ text: translations[lang].adminBackToMain }]
-        ],
-        resize_keyboard: true
+        reply_markup: {
+          keyboard: [
+            [{ text: translations[lang].adminAddCategory }],
+            [{ text: translations[lang].adminRemoveCategory }],
+            [{ text: translations[lang].adminBackToMain }]
+          ],
+          resize_keyboard: true
+        }
       });
     }
     return;
