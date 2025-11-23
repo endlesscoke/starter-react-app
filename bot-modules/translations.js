@@ -5,6 +5,16 @@ const translations = {
     backToMenu: '⬅️ Back to Main Menu',
     cancel: '❌ Cancel',
     
+    // Main Menu
+    menuRegister: '📝 Register',
+    menuMyInfo: '👤 My Info',
+    menuLanguage: '🌐 Language',
+    menuPlaceOrder: '🛒 Place Order',
+    menuViewProducts: '📦 View Products',
+    menuMyCart: '🛍️ My Cart',
+    menuAdminPanel: '🔧 Admin Menu',
+    menuCourierPanel: '🚚 Courier Menu',
+    
     // Cart
     myCart: '🛍️ My Cart',
     cartEmpty: 'Your cart is empty',
@@ -36,6 +46,16 @@ const translations = {
     backToMenu: '⬅️ Назад в меню',
     cancel: '❌ Отмена',
     
+    // Main Menu
+    menuRegister: '📝 Регистрация',
+    menuMyInfo: '👤 Моя информация',
+    menuLanguage: '🌐 Язык',
+    menuPlaceOrder: '🛒 Оформить заказ',
+    menuViewProducts: '📦 Просмотр товаров',
+    menuMyCart: '🛍️ Моя корзина',
+    menuAdminPanel: '🔧 Админ панель',
+    menuCourierPanel: '🚚 Меню курьера',
+    
     // Cart
     myCart: '🛍️ Моя корзина',
     cartEmpty: 'Ваша корзина пуста',
@@ -66,6 +86,16 @@ const translations = {
     // General
     backToMenu: '⬅️ Tagasi menüüsse',
     cancel: '❌ Tühista',
+    
+    // Main Menu
+    menuRegister: '📝 Registreeri',
+    menuMyInfo: '👤 Minu info',
+    menuLanguage: '🌐 Keel',
+    menuPlaceOrder: '🛒 Tee tellimus',
+    menuViewProducts: '📦 Vaata tooteid',
+    menuMyCart: '🛍️ Minu ostukorv',
+    menuAdminPanel: '🔧 Admin menüü',
+    menuCourierPanel: '🚚 Kulleri menüü',
     
     // Cart
     myCart: '🛍️ Minu ostukorv',

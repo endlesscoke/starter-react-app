@@ -86,6 +86,12 @@ function calculateTotal(cart) {
   }, 0);
 }
 
+// Check if cart has items
+function hasItems(carts, userId) {
+  const cart = carts[userId];
+  return cart && cart.items && cart.items.length > 0;
+}
+
 module.exports = {
   loadCarts,
   saveCarts,
@@ -93,5 +99,6 @@ module.exports = {
   addToCart,
   removeFromCart,
   clearCart,
-  calculateTotal
+  calculateTotal,
+  hasItems
 };
