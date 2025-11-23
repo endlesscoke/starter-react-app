@@ -20,15 +20,19 @@ This project now includes a **Telegram Bot** with ordering system and admin pane
 👉 **[View Telegram Bot Documentation](TELEGRAM_BOT.md)**  
 📦 **[Deployment Guide](DEPLOYMENT.md)** - Deploy to VPS, Heroku, Railway, Docker, etc.
 
-Quick start:
+**Quick start (local):**
 ```bash
-# Configure your bot token
 cp .env.example .env
 # Edit .env and add your TELEGRAM_BOT_TOKEN
-
-# Run the bot
+npm install
 npm run bot
 ```
+
+**Quick deploy (server):**
+```bash
+chmod +x deploy.sh && ./deploy.sh
+```
+See [DEPLOYMENT.md](DEPLOYMENT.md) for details.
 
 ## Available Scripts
 

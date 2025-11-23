@@ -2,6 +2,35 @@
 
 This guide explains how to deploy the Telegram bot to a server.
 
+## 🚀 One Command Deployment (Fastest)
+
+If you want to deploy and run the bot with minimal steps:
+
+```bash
+# 1. Clone and enter the repository
+git clone https://github.com/endlesscoke/starter-react-app.git
+cd starter-react-app
+git checkout copilot/add-user-registration-bot
+
+# 2. Configure your bot token
+cp .env.example .env
+nano .env  # Add TELEGRAM_BOT_TOKEN and ADMIN_IDS
+
+# 3. Run deployment script
+chmod +x deploy.sh && ./deploy.sh
+```
+
+The `deploy.sh` script will:
+- ✅ Install dependencies
+- ✅ Install PM2 (process manager)
+- ✅ Start the bot
+- ✅ Configure auto-start on system reboot
+- ✅ Show bot status and logs
+
+**Done!** Your bot is now running. Use `pm2 logs telegram-bot` to view logs.
+
+---
+
 ## Deployment Options
 
 ### Option 1: VPS/Cloud Server (Ubuntu/Debian)
