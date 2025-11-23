@@ -21,6 +21,7 @@ const productsFilePath = path.join(__dirname, 'products.json');
 const ordersFilePath = path.join(__dirname, 'orders.json');
 const categoriesFilePath = path.join(__dirname, 'categories.json');
 const couriersFilePath = path.join(__dirname, 'couriers.json');
+const blacklistFilePath = path.join(__dirname, 'blacklist.json');
 
 // Initialize storage
 let users = {};
@@ -28,6 +29,7 @@ let products = [];
 let orders = [];
 let categories = [];
 let couriers = {};
+let blacklist = {};
 
 // Admin user IDs (add your Telegram user ID here)
 const ADMIN_IDS = process.env.ADMIN_IDS ? process.env.ADMIN_IDS.split(',').map(id => parseInt(id.trim())) : [];
@@ -35,6 +37,11 @@ const ADMIN_IDS = process.env.ADMIN_IDS ? process.env.ADMIN_IDS.split(',').map(i
 // Helper function to check if user is a courier
 function isCourier(userId) {
   return couriers.hasOwnProperty(userId);
+}
+
+// Helper function to check if user is blacklisted
+function isBlacklisted(userId) {
+  return blacklist.hasOwnProperty(userId);
 }
 
 // Translations for multi-language support
@@ -147,7 +154,29 @@ const translations = {
     noCouriersToRemove: 'No couriers to remove.',
     noCouriersAvailable: 'No couriers available.',
     couriersList: '👥 Couriers List',
-    addedBy: 'Added by'
+    addedBy: 'Added by',
+    // User Management & Blacklist
+    adminViewUsers: '👤 View Users',
+    adminManageBlacklist: '🚫 Manage Blacklist',
+    adminAddToBlacklist: '➕ Add to Blacklist',
+    adminRemoveFromBlacklist: '➖ Remove from Blacklist',
+    adminViewBlacklist: '👁️ View Blacklist',
+    usersList: '👤 All Users',
+    blacklistList: '🚫 Blacklisted Users',
+    enterUserIdToBlacklist: 'Enter user Telegram ID to blacklist:',
+    enterBlacklistReason: 'Enter reason for blacklisting (optional, or type /skip):',
+    userBlacklisted: '✅ User added to blacklist!',
+    userRemovedFromBlacklist: '✅ User removed from blacklist!',
+    userNotFound: '❌ User not found.',
+    selectUserToUnblacklist: 'Select user to remove from blacklist:',
+    noBlacklistedUsers: 'No blacklisted users.',
+    blacklisted: '🚫 You are blacklisted and cannot use this feature.',
+    blacklistedBy: 'Blacklisted by',
+    blacklistReason: 'Reason',
+    noUsersFound: 'No users found.',
+    // Courier Nickname
+    enterCourierNickname: 'Enter courier nickname:',
+    courierNickname: 'Nickname'
   },
   ru: {
     welcome: '👋 Добро пожаловать в Бот Заказов!\n\nПожалуйста, выберите язык:',
@@ -257,7 +286,29 @@ const translations = {
     noCouriersToRemove: 'Нет курьеров для удаления.',
     noCouriersAvailable: 'Курьеры отсутствуют.',
     couriersList: '👥 Список курьеров',
-    addedBy: 'Добавлен'
+    addedBy: 'Добавлен',
+    // User Management & Blacklist
+    adminViewUsers: '👤 Просмотр пользователей',
+    adminManageBlacklist: '🚫 Управление черным списком',
+    adminAddToBlacklist: '➕ Добавить в черный список',
+    adminRemoveFromBlacklist: '➖ Удалить из черного списка',
+    adminViewBlacklist: '👁️ Просмотр черного списка',
+    usersList: '👤 Все пользователи',
+    blacklistList: '🚫 Пользователи в черном списке',
+    enterUserIdToBlacklist: 'Введите Telegram ID пользователя для добавления в черный список:',
+    enterBlacklistReason: 'Введите причину блокировки (необязательно, или введите /skip):',
+    userBlacklisted: '✅ Пользователь добавлен в черный список!',
+    userRemovedFromBlacklist: '✅ Пользователь удален из черного списка!',
+    userNotFound: '❌ Пользователь не найден.',
+    selectUserToUnblacklist: 'Выберите пользователя для удаления из черного списка:',
+    noBlacklistedUsers: 'Нет пользователей в черном списке.',
+    blacklisted: '🚫 Вы находитесь в черном списке и не можете использовать эту функцию.',
+    blacklistedBy: 'Заблокировал',
+    blacklistReason: 'Причина',
+    noUsersFound: 'Пользователи не найдены.',
+    // Courier Nickname
+    enterCourierNickname: 'Введите ник курьера:',
+    courierNickname: 'Ник'
   },
   et: {
     welcome: '👋 Tere tulemast tellimuste botti!\n\nPalun valige keel:',
@@ -367,7 +418,29 @@ const translations = {
     noCouriersToRemove: 'Ei ole kullereid eemaldamiseks.',
     noCouriersAvailable: 'Kullereid pole saadaval.',
     couriersList: '👥 Kullerite nimekiri',
-    addedBy: 'Lisas'
+    addedBy: 'Lisas',
+    // User Management & Blacklist
+    adminViewUsers: '👤 Vaata kasutajaid',
+    adminManageBlacklist: '🚫 Halda musta nimekirja',
+    adminAddToBlacklist: '➕ Lisa musta nimekirja',
+    adminRemoveFromBlacklist: '➖ Eemalda mustast nimekirjast',
+    adminViewBlacklist: '👁️ Vaata musta nimekirja',
+    usersList: '👤 Kõik kasutajad',
+    blacklistList: '🚫 Mustas nimekirjas kasutajad',
+    enterUserIdToBlacklist: 'Sisestage kasutaja Telegram ID musta nimekirja lisamiseks:',
+    enterBlacklistReason: 'Sisestage blokeerimise põhjus (valikuline või tippige /skip):',
+    userBlacklisted: '✅ Kasutaja lisatud musta nimekirja!',
+    userRemovedFromBlacklist: '✅ Kasutaja eemaldatud mustast nimekirjast!',
+    userNotFound: '❌ Kasutajat ei leitud.',
+    selectUserToUnblacklist: 'Valige kasutaja mustast nimekirjast eemaldamiseks:',
+    noBlacklistedUsers: 'Mustas nimekirjas pole kasutajaid.',
+    blacklisted: '🚫 Olete mustas nimekirjas ja ei saa seda funktsiooni kasutada.',
+    blacklistedBy: 'Blokeris',
+    blacklistReason: 'Põhjus',
+    noUsersFound: 'Kasutajaid ei leitud.',
+    // Courier Nickname
+    enterCourierNickname: 'Sisestage kulleri hüüdnimi:',
+    courierNickname: 'Hüüdnimi'
   }
 };
 
@@ -492,6 +565,29 @@ function saveCouriers() {
   }
 }
 
+// Load blacklist from file
+function loadBlacklist() {
+  try {
+    if (fs.existsSync(blacklistFilePath)) {
+      const data = fs.readFileSync(blacklistFilePath, 'utf8');
+      blacklist = JSON.parse(data);
+      console.log('Loaded blacklist:', Object.keys(blacklist).length);
+    }
+  } catch (error) {
+    console.error('Error loading blacklist:', error.message);
+    blacklist = {};
+  }
+}
+
+// Save blacklist to file
+function saveBlacklist() {
+  try {
+    fs.writeFileSync(blacklistFilePath, JSON.stringify(blacklist, null, 2));
+  } catch (error) {
+    console.error('Error saving blacklist:', error.message);
+  }
+}
+
 // Check if user is admin
 function isAdmin(userId) {
   return ADMIN_IDS.includes(userId);
@@ -514,6 +610,7 @@ loadProducts();
 loadOrders();
 loadCategories();
 loadCouriers();
+loadBlacklist();
 
 // Store registration state for each user
 const registrationStates = {};
@@ -558,6 +655,8 @@ function getAdminMenuKeyboard(userId) {
       [{ text: translations[lang].adminManageCategories }],
       [{ text: translations[lang].adminManageCouriers }],
       [{ text: translations[lang].adminViewOrders }],
+      [{ text: translations[lang].adminViewUsers }],
+      [{ text: translations[lang].adminManageBlacklist }],
       [{ text: translations[lang].adminBackToMain }]
     ],
     resize_keyboard: true
@@ -970,6 +1069,25 @@ ${product.category ? `📂 ${t(userId, 'category')}: ${product.category}` : ''}
       });
     }
   }
+  // Handle removing user from blacklist
+  else if (data.startsWith('remove_blacklist_')) {
+    if (!isAdmin(userId)) {
+      bot.answerCallbackQuery(query.id, { text: 'Access denied' });
+      return;
+    }
+    
+    const blacklistUserId = data.split('_')[2];
+    
+    if (blacklist[blacklistUserId]) {
+      delete blacklist[blacklistUserId];
+      saveBlacklist();
+      
+      bot.answerCallbackQuery(query.id);
+      bot.sendMessage(chatId, t(userId, 'userRemovedFromBlacklist'), {
+        reply_markup: getAdminMenuKeyboard(userId)
+      });
+    }
+  }
   // Handle order taking by courier
   else if (data.startsWith('take_order_')) {
     if (!isCourier(userId)) {
@@ -1234,6 +1352,10 @@ bot.on('message', (msg) => {
 
   // Handle menu buttons
   if (text === translations[lang].menuRegister) {
+    if (isBlacklisted(userId)) {
+      bot.sendMessage(chatId, t(userId, 'blacklisted'));
+      return;
+    }
     startRegistration(chatId, userId);
     return;
   } else if (text === translations[lang].menuMyInfo) {
@@ -1248,6 +1370,10 @@ bot.on('message', (msg) => {
     showProductsView(chatId, userId);
     return;
   } else if (text === translations[lang].menuPlaceOrder) {
+    if (isBlacklisted(userId)) {
+      bot.sendMessage(chatId, t(userId, 'blacklisted'));
+      return;
+    }
     startOrder(chatId, userId);
     return;
   } else if (text === translations[lang].adminMenu) {
@@ -1357,6 +1483,41 @@ bot.on('message', (msg) => {
   } else if (text === translations[lang].adminViewCouriers) {
     if (isAdmin(userId)) {
       showAllCouriers(chatId, userId);
+    }
+    return;
+  } else if (text === translations[lang].adminViewUsers) {
+    if (isAdmin(userId)) {
+      showAllUsers(chatId, userId);
+    }
+    return;
+  } else if (text === translations[lang].adminManageBlacklist) {
+    if (isAdmin(userId)) {
+      showBlacklistManagement(chatId, userId);
+    }
+    return;
+  } else if (text === translations[lang].adminAddToBlacklist) {
+    if (isAdmin(userId)) {
+      adminStates[userId] = { action: 'add_to_blacklist', step: 'id' };
+      bot.sendMessage(chatId, t(userId, 'enterUserIdToBlacklist'));
+    }
+    return;
+  } else if (text === translations[lang].adminRemoveFromBlacklist) {
+    if (isAdmin(userId)) {
+      const keyboard = getBlacklistRemovalKeyboard();
+      if (keyboard) {
+        bot.sendMessage(chatId, t(userId, 'selectUserToUnblacklist'), {
+          reply_markup: keyboard
+        });
+      } else {
+        bot.sendMessage(chatId, t(userId, 'noBlacklistedUsers'), {
+          reply_markup: getAdminMenuKeyboard(userId)
+        });
+      }
+    }
+    return;
+  } else if (text === translations[lang].adminViewBlacklist) {
+    if (isAdmin(userId)) {
+      showAllBlacklisted(chatId, userId);
     }
     return;
   } else if (text === translations[lang].courierMenu) {
@@ -1741,37 +1902,54 @@ function handleAdminInput(chatId, userId, text) {
     });
   }
   else if (state.action === 'add_courier') {
-    // Validate courier ID
-    const courierId = parseInt(text.trim());
-    if (isNaN(courierId)) {
-      bot.sendMessage(chatId, 'Invalid Telegram ID. Please enter a valid number.');
-      return;
+    if (!state.step) {
+      // Step 1: Get courier ID
+      const courierId = parseInt(text.trim());
+      if (isNaN(courierId)) {
+        bot.sendMessage(chatId, 'Invalid Telegram ID. Please enter a valid number.');
+        return;
+      }
+      
+      // Check if courier already exists
+      if (couriers[courierId]) {
+        bot.sendMessage(chatId, 'This courier is already added.', {
+          reply_markup: getAdminMenuKeyboard(userId)
+        });
+        delete adminStates[userId];
+        return;
+      }
+      
+      state.courierId = courierId;
+      state.step = 'nickname';
+      bot.sendMessage(chatId, t(userId, 'enterCourierNickname'));
     }
-    
-    // Check if courier already exists
-    if (couriers[courierId]) {
-      bot.sendMessage(chatId, 'This courier is already added.', {
+    else if (state.step === 'nickname') {
+      // Step 2: Get courier nickname
+      const nickname = text.trim();
+      if (!nickname || nickname.length < 2) {
+        bot.sendMessage(chatId, 'Nickname must be at least 2 characters.');
+        return;
+      }
+      
+      const courierId = state.courierId;
+      
+      // Add courier
+      couriers[courierId] = {
+        userId: courierId,
+        username: '',
+        name: '',
+        nickname: nickname,
+        addedAt: new Date().toISOString(),
+        addedBy: userId
+      };
+      saveCouriers();
+      
+      delete adminStates[userId];
+      
+      bot.sendMessage(chatId, `✅ ${t(userId, 'courierAdded')}\n${t(userId, 'courierNickname')}: ${nickname}`, {
         reply_markup: getAdminMenuKeyboard(userId)
       });
-      delete adminStates[userId];
-      return;
     }
-    
-    // Add courier
-    couriers[courierId] = {
-      userId: courierId,
-      username: '',
-      name: '',
-      addedAt: new Date().toISOString(),
-      addedBy: userId
-    };
-    saveCouriers();
-    
-    delete adminStates[userId];
-    
-    bot.sendMessage(chatId, t(userId, 'courierAdded'), {
-      reply_markup: getAdminMenuKeyboard(userId)
-    });
   }
   else if (state.action === 'add_customer_note_admin') {
     // Admin adding customer note to an order
@@ -1795,6 +1973,75 @@ function handleAdminInput(chatId, userId, text) {
     bot.sendMessage(chatId, `✅ ${t(userId, 'customerNoteAdded')} #${orderId}`, {
       reply_markup: getAdminMenuKeyboard(userId)
     });
+  }
+  else if (state.action === 'add_to_blacklist') {
+    if (state.step === 'id') {
+      // Step 1: Get user ID
+      const targetUserId = parseInt(text.trim());
+      if (isNaN(targetUserId)) {
+        bot.sendMessage(chatId, 'Invalid Telegram ID. Please enter a valid number.');
+        return;
+      }
+      
+      // Check if user already blacklisted
+      if (blacklist[targetUserId]) {
+        bot.sendMessage(chatId, 'This user is already blacklisted.', {
+          reply_markup: getAdminMenuKeyboard(userId)
+        });
+        delete adminStates[userId];
+        return;
+      }
+      
+      state.targetUserId = targetUserId;
+      state.step = 'reason';
+      bot.sendMessage(chatId, t(userId, 'enterBlacklistReason'));
+    }
+    else if (state.step === 'reason') {
+      // Step 2: Get reason (optional)
+      const reason = text.trim() === '/skip' ? '' : text.trim();
+      const targetUserId = state.targetUserId;
+      
+      // Get user info if exists
+      const targetUser = users[targetUserId];
+      
+      blacklist[targetUserId] = {
+        userId: targetUserId,
+        username: targetUser?.username || '',
+        name: targetUser?.name || 'Unknown',
+        profileLink: targetUser?.profileLink || '',
+        reason: reason,
+        blacklistedAt: new Date().toISOString(),
+        blacklistedBy: userId
+      };
+      
+      saveBlacklist();
+      delete adminStates[userId];
+      
+      bot.sendMessage(chatId, t(userId, 'userBlacklisted'), {
+        reply_markup: getAdminMenuKeyboard(userId)
+      });
+    }
+  }
+  else if (state.action === 'add_courier_nickname') {
+    // Adding nickname to courier
+    const courierId = state.courierId;
+    const nickname = text.trim();
+    
+    if (!nickname || nickname.length < 2) {
+      bot.sendMessage(chatId, 'Nickname must be at least 2 characters.');
+      return;
+    }
+    
+    if (couriers[courierId]) {
+      couriers[courierId].nickname = nickname;
+      saveCouriers();
+      
+      bot.sendMessage(chatId, `✅ Courier nickname set to: ${nickname}`, {
+        reply_markup: getAdminMenuKeyboard(userId)
+      });
+    }
+    
+    delete adminStates[userId];
   }
 }
 
@@ -1872,6 +2119,7 @@ function showAllCouriers(chatId, userId) {
   courierIds.forEach(id => {
     const courier = couriers[id];
     couriersMessage += `👤 ID: ${courier.userId}\n`;
+    if (courier.nickname) couriersMessage += `${t(userId, 'courierNickname')}: ${courier.nickname}\n`;
     if (courier.name) couriersMessage += `Name: ${courier.name}\n`;
     if (courier.username) couriersMessage += `@${courier.username}\n`;
     couriersMessage += `${t(userId, 'addedBy')}: ${courier.addedBy}\n`;
@@ -1892,8 +2140,113 @@ function getCourierRemovalKeyboard() {
   }
   
   const keyboard = courierIds.map(id => ([{
-    text: `${couriers[id].name || couriers[id].username || couriers[id].userId}`,
+    text: `${couriers[id].nickname || couriers[id].name || couriers[id].username || couriers[id].userId}`,
     callback_data: `remove_courier_${id}`
+  }]));
+  
+  return {
+    inline_keyboard: keyboard
+  };
+}
+
+// Show all users (admin function)
+function showAllUsers(chatId, userId) {
+  const userIds = Object.keys(users);
+  
+  if (userIds.length === 0) {
+    bot.sendMessage(chatId, t(userId, 'noUsersFound'), {
+      reply_markup: getAdminMenuKeyboard(userId)
+    });
+    return;
+  }
+
+  let usersMessage = `${t(userId, 'usersList')} (Last 20):\n\n`;
+  
+  // Show last 20 users
+  const recentUsers = userIds.slice(-20).reverse();
+  
+  recentUsers.forEach(id => {
+    const user = users[id];
+    usersMessage += `User #${user.userId}:\n`;
+    usersMessage += `👤 ${t(userId, 'name')}: ${user.name}\n`;
+    usersMessage += `🌍 ${t(userId, 'region')}: ${user.region}\n`;
+    usersMessage += `🌐 ${t(userId, 'language')}: ${user.language}\n`;
+    if (user.profileLink) {
+      usersMessage += `🔗 Profile: ${user.profileLink}\n`;
+    }
+    usersMessage += `📅 ${t(userId, 'registered')}: ${new Date(user.registeredAt).toLocaleString()}\n`;
+    usersMessage += `───────────\n`;
+  });
+
+  bot.sendMessage(chatId, usersMessage, {
+    reply_markup: getAdminMenuKeyboard(userId)
+  });
+}
+
+// Show blacklist management menu
+function showBlacklistManagement(chatId, userId) {
+  const lang = getUserLanguage(userId);
+  const keyboard = {
+    keyboard: [
+      [{ text: translations[lang].adminAddToBlacklist }],
+      [{ text: translations[lang].adminRemoveFromBlacklist }],
+      [{ text: translations[lang].adminViewBlacklist }],
+      [{ text: translations[lang].adminBackToMain }]
+    ],
+    resize_keyboard: true
+  };
+  
+  bot.sendMessage(chatId, translations[lang].adminManageBlacklist, {
+    reply_markup: keyboard
+  });
+}
+
+// Show all blacklisted users
+function showAllBlacklisted(chatId, userId) {
+  const blacklistedIds = Object.keys(blacklist);
+  
+  if (blacklistedIds.length === 0) {
+    bot.sendMessage(chatId, t(userId, 'noBlacklistedUsers'), {
+      reply_markup: getAdminMenuKeyboard(userId)
+    });
+    return;
+  }
+
+  let blacklistMessage = `${t(userId, 'blacklistList')}:\n\n`;
+  
+  blacklistedIds.forEach(id => {
+    const user = blacklist[id];
+    blacklistMessage += `⛔ User #${user.userId}\n`;
+    blacklistMessage += `👤 ${t(userId, 'name')}: ${user.name || 'N/A'}\n`;
+    if (user.profileLink) {
+      blacklistMessage += `🔗 Profile: ${user.profileLink}\n`;
+    } else if (user.username) {
+      blacklistMessage += `@${user.username}\n`;
+    }
+    if (user.reason) {
+      blacklistMessage += `📝 ${t(userId, 'blacklistReason')}: ${user.reason}\n`;
+    }
+    blacklistMessage += `📅 Blacklisted: ${new Date(user.blacklistedAt).toLocaleString()}\n`;
+    blacklistMessage += `👮 ${t(userId, 'blacklistedBy')}: ${user.blacklistedBy}\n`;
+    blacklistMessage += `───────────\n`;
+  });
+
+  bot.sendMessage(chatId, blacklistMessage, {
+    reply_markup: getAdminMenuKeyboard(userId)
+  });
+}
+
+// Get blacklist removal keyboard
+function getBlacklistRemovalKeyboard() {
+  const blacklistedIds = Object.keys(blacklist);
+  
+  if (blacklistedIds.length === 0) {
+    return null;
+  }
+  
+  const keyboard = blacklistedIds.map(id => ([{
+    text: `${blacklist[id].name || blacklist[id].username || blacklist[id].userId}`,
+    callback_data: `remove_blacklist_${id}`
   }]));
   
   return {
