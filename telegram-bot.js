@@ -70,7 +70,7 @@ function getMainMenuKeyboard(userId) {
   if (!users[userId]) {
     keyboard.push([{ text: t(userId, 'menuRegister') }]);
   } else {
-    keyboard.push([{ text: t(userId, 'menuPlaceOrder') }, { text: t(userId, 'menuViewProducts') }]);
+    keyboard.push([{ text: t(userId, 'menuBrowseOrder') }]);
     if (cartModule.hasItems(carts, userId)) {
       keyboard.push([{ text: t(userId, 'menuMyCart') }]);
     }
