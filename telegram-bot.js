@@ -42,8 +42,8 @@ const translations = {
   en: {
     welcome: '👋 Welcome to the Order Bot!\n\nPlease select your language:',
     languageSelected: '✅ Language selected: English',
-    regionSelected: '✅ Region selected!\n\nPlease enter your full name:',
-    enterName: 'Please enter your full name:',
+    regionSelected: '✅ Region selected!\n\nPlease enter your nickname:',
+    enterName: 'Please enter your nickname:',
     nameSaved: '✅ Name saved!',
     alreadyRegistered: '✅ You are already registered!\n\nUse the menu to place orders.',
     registrationCancelled: '❌ Registration cancelled.',
@@ -152,8 +152,8 @@ const translations = {
   ru: {
     welcome: '👋 Добро пожаловать в Бот Заказов!\n\nПожалуйста, выберите язык:',
     languageSelected: '✅ Язык выбран: Русский',
-    regionSelected: '✅ Регион выбран!\n\nПожалуйста, введите ваше полное имя:',
-    enterName: 'Пожалуйста, введите ваше полное имя:',
+    regionSelected: '✅ Регион выбран!\n\nПожалуйста, введите ваш ник:',
+    enterName: 'Пожалуйста, введите ваш ник:',
     nameSaved: '✅ Имя сохранено!',
     alreadyRegistered: '✅ Вы уже зарегистрированы!\n\nИспользуйте меню для оформления заказов.',
     registrationCancelled: '❌ Регистрация отменена.',
@@ -262,8 +262,8 @@ const translations = {
   et: {
     welcome: '👋 Tere tulemast tellimuste botti!\n\nPalun valige keel:',
     languageSelected: '✅ Keel valitud: Eesti',
-    regionSelected: '✅ Piirkond valitud!\n\nPalun sisestage oma täisnimi:',
-    enterName: 'Palun sisestage oma täisnimi:',
+    regionSelected: '✅ Piirkond valitud!\n\nPalun sisestage oma hüüdnimi:',
+    enterName: 'Palun sisestage oma hüüdnimi:',
     nameSaved: '✅ Nimi salvestatud!',
     alreadyRegistered: '✅ Olete juba registreeritud!\n\nKasutage menüüd tellimuste tegemiseks.',
     registrationCancelled: '❌ Registreerimine tühistatud.',
@@ -1091,6 +1091,92 @@ ${product.category ? `📂 ${t(userId, 'category')}: ${product.category}` : ''}
     bot.answerCallbackQuery(query.id);
     bot.sendMessage(chatId, t(userId, 'enterCustomerNote'));
   }
+  // Handle admin order status update
+  else if (data.startsWith('admin_update_order_')) {
+    if (!isAdmin(userId)) {
+      bot.answerCallbackQuery(query.id, { text: 'Access denied' });
+      return;
+    }
+    
+    const orderId = parseInt(data.split('_')[3]);
+    const order = orders.find(o => o.orderId === orderId);
+    
+    if (!order) {
+      bot.answerCallbackQuery(query.id, { text: 'Order not found' });
+      return;
+    }
+    
+    // Show status selection keyboard
+    const keyboard = {
+      inline_keyboard: [
+        [{ text: '⏳ Pending', callback_data: `admin_set_status_${orderId}_pending` }],
+        [{ text: '🚚 In Progress', callback_data: `admin_set_status_${orderId}_in_progress` }],
+        [{ text: '✅ Completed', callback_data: `admin_set_status_${orderId}_completed` }]
+      ]
+    };
+    
+    bot.answerCallbackQuery(query.id);
+    bot.sendMessage(chatId, `${t(userId, 'selectOrderStatus')} #${orderId}`, {
+      reply_markup: keyboard
+    });
+  }
+  // Handle admin setting order status
+  else if (data.startsWith('admin_set_status_')) {
+    if (!isAdmin(userId)) {
+      bot.answerCallbackQuery(query.id, { text: 'Access denied' });
+      return;
+    }
+    
+    const parts = data.split('_');
+    const orderId = parseInt(parts[3]);
+    const newStatus = parts[4];
+    
+    const order = orders.find(o => o.orderId === orderId);
+    
+    if (!order) {
+      bot.answerCallbackQuery(query.id, { text: 'Order not found' });
+      return;
+    }
+    
+    order.status = newStatus;
+    order.updatedAt = new Date().toISOString();
+    saveOrders();
+    
+    bot.answerCallbackQuery(query.id);
+    bot.sendMessage(chatId, `✅ ${t(userId, 'statusUpdated')} #${orderId}`, {
+      reply_markup: getAdminMenuKeyboard(userId)
+    });
+  }
+  // Handle admin adding customer note
+  else if (data.startsWith('admin_note_order_')) {
+    if (!isAdmin(userId)) {
+      bot.answerCallbackQuery(query.id, { text: 'Access denied' });
+      return;
+    }
+    
+    const orderId = parseInt(data.split('_')[3]);
+    const order = orders.find(o => o.orderId === orderId);
+    
+    if (!order) {
+      bot.answerCallbackQuery(query.id, { text: 'Order not found' });
+      return;
+    }
+    
+    adminStates[userId] = {
+      action: 'add_customer_note_admin',
+      orderId: orderId
+    };
+    
+    bot.answerCallbackQuery(query.id);
+    bot.sendMessage(chatId, t(userId, 'enterCustomerNote'));
+  }
+  // Handle back to admin menu
+  else if (data === 'back_to_admin') {
+    bot.answerCallbackQuery(query.id);
+    bot.sendMessage(chatId, t(userId, 'adminMenu'), {
+      reply_markup: getAdminMenuKeyboard(userId)
+    });
+  }
 });
 
 // Handle menu button presses
@@ -1428,10 +1514,14 @@ function handleRegistrationInput(chatId, userId, text) {
     
     // Complete registration (no email needed)
     const lang = getUserLanguage(userId);
+    const username = state.username || null;
+    const profileLink = username ? `https://t.me/${username}` : `tg://user?id=${userId}`;
+    
     users[userId] = {
       userId: userId,
-      username: state.username || 'user',
+      username: username || `user${userId}`,
       name: state.data.name,
+      profileLink: profileLink,
       language: lang,
       region: state.data.region,
       registeredAt: new Date().toISOString()
@@ -1683,6 +1773,29 @@ function handleAdminInput(chatId, userId, text) {
       reply_markup: getAdminMenuKeyboard(userId)
     });
   }
+  else if (state.action === 'add_customer_note_admin') {
+    // Admin adding customer note to an order
+    const orderId = state.orderId;
+    const order = orders.find(o => o.orderId === orderId);
+    
+    if (!order) {
+      bot.sendMessage(chatId, 'Order not found.', {
+        reply_markup: getAdminMenuKeyboard(userId)
+      });
+      delete adminStates[userId];
+      return;
+    }
+    
+    order.customerNotes = text.trim();
+    order.updatedAt = new Date().toISOString();
+    saveOrders();
+    
+    delete adminStates[userId];
+    
+    bot.sendMessage(chatId, `✅ ${t(userId, 'customerNoteAdded')} #${orderId}`, {
+      reply_markup: getAdminMenuKeyboard(userId)
+    });
+  }
 }
 
 // Show all orders (admin function)
@@ -1694,20 +1807,50 @@ function showAllOrders(chatId, userId) {
     return;
   }
 
-  let ordersMessage = '📋 All Orders:\n\n';
+  let ordersMessage = '📋 All Orders (Last 20):\n\n';
   
-  orders.slice(-10).reverse().forEach(order => {
-    ordersMessage += `Order #${order.orderId}\n`;
+  const recentOrders = orders.slice(-20).reverse();
+  
+  recentOrders.forEach(order => {
+    let statusEmoji = '⏳';
+    if (order.status === 'in_progress') statusEmoji = '🚚';
+    if (order.status === 'completed') statusEmoji = '✅';
+    
+    ordersMessage += `${statusEmoji} Order #${order.orderId}\n`;
     ordersMessage += `👤 ${order.userName}\n`;
     ordersMessage += `📦 ${order.product}\n`;
     ordersMessage += `📍 ${order.address}\n`;
     ordersMessage += `🕐 ${order.time}\n`;
-    ordersMessage += `Status: ${order.status}\n`;
+    ordersMessage += `Status: ${order.status}`;
+    if (order.courierName) {
+      ordersMessage += ` (${t(userId, 'courier')}: ${order.courierName})`;
+    }
+    ordersMessage += `\n`;
+    if (order.customerNotes) {
+      ordersMessage += `📝 ${t(userId, 'customerNotes')}: ${order.customerNotes}\n`;
+    }
     ordersMessage += `───────────\n`;
   });
 
+  // Create action buttons for each order (admin can manage all orders)
+  const keyboard = [];
+  recentOrders.slice(0, 10).forEach(order => { // Show buttons for first 10 orders
+    keyboard.push([
+      {
+        text: `🔄 Update #${order.orderId}`,
+        callback_data: `admin_update_order_${order.orderId}`
+      },
+      {
+        text: `📝 Note #${order.orderId}`,
+        callback_data: `admin_note_order_${order.orderId}`
+      }
+    ]);
+  });
+  
+  keyboard.push([{ text: t(userId, 'adminBackToMain'), callback_data: 'back_to_admin' }]);
+
   bot.sendMessage(chatId, ordersMessage, {
-    reply_markup: getAdminMenuKeyboard(userId)
+    reply_markup: { inline_keyboard: keyboard }
   });
 }
 
