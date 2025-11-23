@@ -20,15 +20,22 @@ const usersFilePath = path.join(__dirname, 'users.json');
 const productsFilePath = path.join(__dirname, 'products.json');
 const ordersFilePath = path.join(__dirname, 'orders.json');
 const categoriesFilePath = path.join(__dirname, 'categories.json');
+const couriersFilePath = path.join(__dirname, 'couriers.json');
 
 // Initialize storage
 let users = {};
 let products = [];
 let orders = [];
 let categories = [];
+let couriers = {};
 
 // Admin user IDs (add your Telegram user ID here)
 const ADMIN_IDS = process.env.ADMIN_IDS ? process.env.ADMIN_IDS.split(',').map(id => parseInt(id.trim())) : [];
+
+// Helper function to check if user is a courier
+function isCourier(userId) {
+  return couriers.hasOwnProperty(userId);
+}
 
 // Translations for multi-language support
 const translations = {
@@ -106,7 +113,41 @@ const translations = {
     selectCategory: 'Select category:',
     selectCategoryToRemove: 'Select category to remove:',
     noCategoriesAvailable: 'No categories available.',
-    viewByCategory: 'View by category'
+    viewByCategory: 'View by category',
+    // Courier
+    courierMenu: '🚚 Courier Menu',
+    availableOrders: '📦 Available Orders',
+    myOrders: '🚚 My Orders',
+    takeOrder: '✅ Take Order',
+    updateStatus: '🔄 Update Status',
+    addCustomerNote: '📝 Add Customer Note',
+    orderTaken: '✅ Order taken successfully!',
+    orderAlreadyTaken: '❌ This order has already been taken by another courier.',
+    noAvailableOrders: 'No available orders at the moment.',
+    noAssignedOrders: 'You have no assigned orders.',
+    enterCustomerNote: 'Enter customer note (e.g., "Polite customer", "Rude", etc.):',
+    customerNoteAdded: '✅ Customer note added successfully!',
+    selectOrderStatus: 'Select new order status:',
+    statusUpdated: '✅ Order status updated!',
+    orderStatusPending: '⏳ Pending',
+    orderStatusInProgress: '🚚 In Progress',
+    orderStatusCompleted: '✅ Completed',
+    courier: 'Courier',
+    customerNotes: 'Customer Notes',
+    // Admin Courier Management
+    adminManageCouriers: '👥 Manage Couriers',
+    adminAddCourier: '➕ Add Courier',
+    adminRemoveCourier: '➖ Remove Courier',
+    adminViewCouriers: '👁️ View Couriers',
+    enterCourierId: 'Enter courier Telegram ID:',
+    courierAdded: '✅ Courier added successfully!',
+    courierRemoved: '✅ Courier removed successfully!',
+    courierNotFound: '❌ Courier not found.',
+    selectCourierToRemove: 'Select courier to remove:',
+    noCouriersToRemove: 'No couriers to remove.',
+    noCouriersAvailable: 'No couriers available.',
+    couriersList: '👥 Couriers List',
+    addedBy: 'Added by'
   },
   ru: {
     welcome: '👋 Добро пожаловать в Бот Заказов!\n\nПожалуйста, выберите язык:',
@@ -182,7 +223,41 @@ const translations = {
     selectCategory: 'Выберите категорию:',
     selectCategoryToRemove: 'Выберите категорию для удаления:',
     noCategoriesAvailable: 'Категории отсутствуют.',
-    viewByCategory: 'Просмотр по категориям'
+    viewByCategory: 'Просмотр по категориям',
+    // Courier
+    courierMenu: '🚚 Меню курьера',
+    availableOrders: '📦 Доступные заказы',
+    myOrders: '🚚 Мои заказы',
+    takeOrder: '✅ Взять заказ',
+    updateStatus: '🔄 Обновить статус',
+    addCustomerNote: '📝 Добавить заметку о клиенте',
+    orderTaken: '✅ Заказ успешно взят!',
+    orderAlreadyTaken: '❌ Этот заказ уже взят другим курьером.',
+    noAvailableOrders: 'На данный момент нет доступных заказов.',
+    noAssignedOrders: 'У вас нет назначенных заказов.',
+    enterCustomerNote: 'Введите заметку о клиенте (например, "Вежливый клиент", "Грубый" и т.д.):',
+    customerNoteAdded: '✅ Заметка о клиенте успешно добавлена!',
+    selectOrderStatus: 'Выберите новый статус заказа:',
+    statusUpdated: '✅ Статус заказа обновлен!',
+    orderStatusPending: '⏳ Ожидает',
+    orderStatusInProgress: '🚚 В процессе',
+    orderStatusCompleted: '✅ Выполнен',
+    courier: 'Курьер',
+    customerNotes: 'Заметки о клиенте',
+    // Admin Courier Management
+    adminManageCouriers: '👥 Управление курьерами',
+    adminAddCourier: '➕ Добавить курьера',
+    adminRemoveCourier: '➖ Удалить курьера',
+    adminViewCouriers: '👁️ Просмотр курьеров',
+    enterCourierId: 'Введите Telegram ID курьера:',
+    courierAdded: '✅ Курьер успешно добавлен!',
+    courierRemoved: '✅ Курьер успешно удален!',
+    courierNotFound: '❌ Курьер не найден.',
+    selectCourierToRemove: 'Выберите курьера для удаления:',
+    noCouriersToRemove: 'Нет курьеров для удаления.',
+    noCouriersAvailable: 'Курьеры отсутствуют.',
+    couriersList: '👥 Список курьеров',
+    addedBy: 'Добавлен'
   },
   et: {
     welcome: '👋 Tere tulemast tellimuste botti!\n\nPalun valige keel:',
@@ -258,7 +333,41 @@ const translations = {
     selectCategory: 'Valige kategooria:',
     selectCategoryToRemove: 'Valige eemaldatav kategooria:',
     noCategoriesAvailable: 'Kategooriaid pole saadaval.',
-    viewByCategory: 'Vaata kategooriate kaupa'
+    viewByCategory: 'Vaata kategooriate kaupa',
+    // Courier
+    courierMenu: '🚚 Kullermenüü',
+    availableOrders: '📦 Saadaolevad tellimused',
+    myOrders: '🚚 Minu tellimused',
+    takeOrder: '✅ Võta tellimus',
+    updateStatus: '🔄 Uuenda staatust',
+    addCustomerNote: '📝 Lisa kliendi märkus',
+    orderTaken: '✅ Tellimus edukalt võetud!',
+    orderAlreadyTaken: '❌ See tellimus on juba teise kulleri poolt võetud.',
+    noAvailableOrders: 'Hetkel pole saadaolevaid tellimusi.',
+    noAssignedOrders: 'Teil pole määratud tellimusi.',
+    enterCustomerNote: 'Sisestage kliendi märkus (nt "Viisakas klient", "Ebaviisakas" jne):',
+    customerNoteAdded: '✅ Kliendi märkus edukalt lisatud!',
+    selectOrderStatus: 'Valige uus tellimuse staatus:',
+    statusUpdated: '✅ Tellimuse staatus uuendatud!',
+    orderStatusPending: '⏳ Ootel',
+    orderStatusInProgress: '🚚 Pooleli',
+    orderStatusCompleted: '✅ Lõpetatud',
+    courier: 'Kuller',
+    customerNotes: 'Kliendi märkused',
+    // Admin Courier Management
+    adminManageCouriers: '👥 Halda kullereid',
+    adminAddCourier: '➕ Lisa kuller',
+    adminRemoveCourier: '➖ Eemalda kuller',
+    adminViewCouriers: '👁️ Vaata kullereid',
+    enterCourierId: 'Sisestage kulleri Telegram ID:',
+    courierAdded: '✅ Kuller edukalt lisatud!',
+    courierRemoved: '✅ Kuller edukalt eemaldatud!',
+    courierNotFound: '❌ Kullerit ei leitud.',
+    selectCourierToRemove: 'Valige eemaldatav kuller:',
+    noCouriersToRemove: 'Ei ole kullereid eemaldamiseks.',
+    noCouriersAvailable: 'Kullereid pole saadaval.',
+    couriersList: '👥 Kullerite nimekiri',
+    addedBy: 'Lisas'
   }
 };
 
@@ -266,6 +375,7 @@ const translations = {
 const userPreferences = {};
 const orderStates = {};
 const adminStates = {};
+const courierStates = {};
 
 // Load existing users from file
 function loadUsers() {
@@ -359,6 +469,29 @@ function saveCategories() {
   }
 }
 
+// Load couriers from file
+function loadCouriers() {
+  try {
+    if (fs.existsSync(couriersFilePath)) {
+      const data = fs.readFileSync(couriersFilePath, 'utf8');
+      couriers = JSON.parse(data);
+      console.log('Loaded couriers:', Object.keys(couriers).length);
+    }
+  } catch (error) {
+    console.error('Error loading couriers:', error.message);
+    couriers = {};
+  }
+}
+
+// Save couriers to file
+function saveCouriers() {
+  try {
+    fs.writeFileSync(couriersFilePath, JSON.stringify(couriers, null, 2));
+  } catch (error) {
+    console.error('Error saving couriers:', error.message);
+  }
+}
+
 // Check if user is admin
 function isAdmin(userId) {
   return ADMIN_IDS.includes(userId);
@@ -380,6 +513,7 @@ loadUsers();
 loadProducts();
 loadOrders();
 loadCategories();
+loadCouriers();
 
 // Store registration state for each user
 const registrationStates = {};
@@ -404,6 +538,10 @@ function getMainMenuKeyboard(userId) {
     keyboard.push([{ text: translations[lang].adminMenu }]);
   }
   
+  if (isCourier(userId)) {
+    keyboard.push([{ text: translations[lang].courierMenu }]);
+  }
+  
   return {
     keyboard: keyboard,
     resize_keyboard: true
@@ -418,7 +556,21 @@ function getAdminMenuKeyboard(userId) {
       [{ text: translations[lang].adminAddProduct }],
       [{ text: translations[lang].adminRemoveProduct }],
       [{ text: translations[lang].adminManageCategories }],
+      [{ text: translations[lang].adminManageCouriers }],
       [{ text: translations[lang].adminViewOrders }],
+      [{ text: translations[lang].adminBackToMain }]
+    ],
+    resize_keyboard: true
+  };
+}
+
+// Create courier menu keyboard
+function getCourierMenuKeyboard(userId) {
+  const lang = getUserLanguage(userId);
+  return {
+    keyboard: [
+      [{ text: translations[lang].availableOrders }],
+      [{ text: translations[lang].myOrders }],
       [{ text: translations[lang].adminBackToMain }]
     ],
     resize_keyboard: true
@@ -799,6 +951,146 @@ ${product.category ? `📂 ${t(userId, 'category')}: ${product.category}` : ''}
       delete adminStates[userId];
     }
   }
+  // Handle courier removal by admin
+  else if (data.startsWith('remove_courier_')) {
+    if (!isAdmin(userId)) {
+      bot.answerCallbackQuery(query.id, { text: 'Access denied' });
+      return;
+    }
+    
+    const courierId = data.split('_')[2];
+    
+    if (couriers[courierId]) {
+      delete couriers[courierId];
+      saveCouriers();
+      
+      bot.answerCallbackQuery(query.id);
+      bot.sendMessage(chatId, t(userId, 'courierRemoved'), {
+        reply_markup: getAdminMenuKeyboard(userId)
+      });
+    }
+  }
+  // Handle order taking by courier
+  else if (data.startsWith('take_order_')) {
+    if (!isCourier(userId)) {
+      bot.answerCallbackQuery(query.id, { text: 'Access denied' });
+      return;
+    }
+    
+    const orderId = parseInt(data.split('_')[2]);
+    const order = orders.find(o => o.orderId === orderId);
+    
+    if (!order) {
+      bot.answerCallbackQuery(query.id, { text: 'Order not found' });
+      return;
+    }
+    
+    if (order.status !== 'pending') {
+      bot.answerCallbackQuery(query.id, { text: t(userId, 'orderAlreadyTaken') });
+      return;
+    }
+    
+    // Assign order to courier
+    order.courierId = userId;
+    order.courierName = couriers[userId].name || couriers[userId].username || `Courier ${userId}`;
+    order.status = 'in_progress';
+    order.updatedAt = new Date().toISOString();
+    saveOrders();
+    
+    bot.answerCallbackQuery(query.id);
+    bot.sendMessage(chatId, t(userId, 'orderTaken'), {
+      reply_markup: getCourierMenuKeyboard(userId)
+    });
+  }
+  // Handle order status update by courier
+  else if (data.startsWith('update_status_')) {
+    if (!isCourier(userId)) {
+      bot.answerCallbackQuery(query.id, { text: 'Access denied' });
+      return;
+    }
+    
+    const orderId = parseInt(data.split('_')[2]);
+    const order = orders.find(o => o.orderId === orderId);
+    
+    if (!order || order.courierId !== userId) {
+      bot.answerCallbackQuery(query.id, { text: 'Access denied' });
+      return;
+    }
+    
+    // Show status update options
+    bot.answerCallbackQuery(query.id);
+    
+    const keyboard = {
+      inline_keyboard: []
+    };
+    
+    if (order.status === 'pending') {
+      keyboard.inline_keyboard.push([{
+        text: t(userId, 'orderStatusInProgress'),
+        callback_data: `set_status_${orderId}_in_progress`
+      }]);
+    }
+    if (order.status === 'in_progress') {
+      keyboard.inline_keyboard.push([{
+        text: t(userId, 'orderStatusCompleted'),
+        callback_data: `set_status_${orderId}_completed`
+      }]);
+    }
+    
+    bot.sendMessage(chatId, t(userId, 'selectOrderStatus'), {
+      reply_markup: keyboard
+    });
+  }
+  // Handle setting order status
+  else if (data.startsWith('set_status_')) {
+    if (!isCourier(userId)) {
+      bot.answerCallbackQuery(query.id, { text: 'Access denied' });
+      return;
+    }
+    
+    const parts = data.split('_');
+    const orderId = parseInt(parts[2]);
+    const newStatus = parts[3];
+    
+    const order = orders.find(o => o.orderId === orderId);
+    
+    if (!order || order.courierId !== userId) {
+      bot.answerCallbackQuery(query.id, { text: 'Access denied' });
+      return;
+    }
+    
+    order.status = newStatus;
+    order.updatedAt = new Date().toISOString();
+    saveOrders();
+    
+    bot.answerCallbackQuery(query.id);
+    bot.sendMessage(chatId, t(userId, 'statusUpdated'), {
+      reply_markup: getCourierMenuKeyboard(userId)
+    });
+  }
+  // Handle adding customer note
+  else if (data.startsWith('add_note_')) {
+    if (!isCourier(userId)) {
+      bot.answerCallbackQuery(query.id, { text: 'Access denied' });
+      return;
+    }
+    
+    const orderId = parseInt(data.split('_')[2]);
+    const order = orders.find(o => o.orderId === orderId);
+    
+    if (!order || order.courierId !== userId) {
+      bot.answerCallbackQuery(query.id, { text: 'Access denied' });
+      return;
+    }
+    
+    courierStates[userId] = {
+      action: 'add_customer_note',
+      orderId: orderId
+    };
+    
+    bot.answerCallbackQuery(query.id);
+    bot.sendMessage(chatId, t(userId, 'enterCustomerNote'));
+  }
 });
 
 // Handle menu button presses
@@ -940,11 +1232,70 @@ bot.on('message', (msg) => {
       showAllOrders(chatId, userId);
     }
     return;
+  } else if (text === translations[lang].adminManageCouriers) {
+    if (isAdmin(userId)) {
+      // Show courier management sub-menu
+      bot.sendMessage(chatId, t(userId, 'adminManageCouriers'), {
+        reply_markup: {
+          keyboard: [
+            [{ text: translations[lang].adminAddCourier }],
+            [{ text: translations[lang].adminRemoveCourier }],
+            [{ text: translations[lang].adminViewCouriers }],
+            [{ text: translations[lang].adminBackToMain }]
+          ],
+          resize_keyboard: true
+        }
+      });
+    }
+    return;
+  } else if (text === translations[lang].adminAddCourier) {
+    if (isAdmin(userId)) {
+      adminStates[userId] = { action: 'add_courier' };
+      bot.sendMessage(chatId, t(userId, 'enterCourierId'));
+    }
+    return;
+  } else if (text === translations[lang].adminRemoveCourier) {
+    if (isAdmin(userId)) {
+      const keyboard = getCourierRemovalKeyboard();
+      if (keyboard) {
+        bot.sendMessage(chatId, t(userId, 'selectCourierToRemove'), {
+          reply_markup: keyboard
+        });
+      } else {
+        bot.sendMessage(chatId, t(userId, 'noCouriersToRemove'), {
+          reply_markup: getAdminMenuKeyboard(userId)
+        });
+      }
+    }
+    return;
+  } else if (text === translations[lang].adminViewCouriers) {
+    if (isAdmin(userId)) {
+      showAllCouriers(chatId, userId);
+    }
+    return;
+  } else if (text === translations[lang].courierMenu) {
+    if (isCourier(userId)) {
+      bot.sendMessage(chatId, t(userId, 'courierMenu'), {
+        reply_markup: getCourierMenuKeyboard(userId)
+      });
+    }
+    return;
+  } else if (text === translations[lang].availableOrders) {
+    if (isCourier(userId)) {
+      showAvailableOrders(chatId, userId);
+    }
+    return;
+  } else if (text === translations[lang].myOrders) {
+    if (isCourier(userId)) {
+      showCourierOrders(chatId, userId);
+    }
+    return;
   } else if (text === translations[lang].adminBackToMain) {
     bot.sendMessage(chatId, t(userId, 'languageSelected'), {
       reply_markup: getMainMenuKeyboard(userId)
     });
     delete adminStates[userId];
+    delete courierStates[userId];
     return;
   } else if (text === translations[lang].menuCancel) {
     if (registrationStates[userId]) {
@@ -964,6 +1315,12 @@ bot.on('message', (msg) => {
   // Handle admin input
   if (adminStates[userId]) {
     handleAdminInput(chatId, userId, text);
+    return;
+  }
+
+  // Handle courier input
+  if (courierStates[userId]) {
+    handleCourierInput(chatId, userId, text);
     return;
   }
 
@@ -1293,6 +1650,39 @@ function handleAdminInput(chatId, userId, text) {
       reply_markup: getAdminMenuKeyboard(userId)
     });
   }
+  else if (state.action === 'add_courier') {
+    // Validate courier ID
+    const courierId = parseInt(text.trim());
+    if (isNaN(courierId)) {
+      bot.sendMessage(chatId, 'Invalid Telegram ID. Please enter a valid number.');
+      return;
+    }
+    
+    // Check if courier already exists
+    if (couriers[courierId]) {
+      bot.sendMessage(chatId, 'This courier is already added.', {
+        reply_markup: getAdminMenuKeyboard(userId)
+      });
+      delete adminStates[userId];
+      return;
+    }
+    
+    // Add courier
+    couriers[courierId] = {
+      userId: courierId,
+      username: '',
+      name: '',
+      addedAt: new Date().toISOString(),
+      addedBy: userId
+    };
+    saveCouriers();
+    
+    delete adminStates[userId];
+    
+    bot.sendMessage(chatId, t(userId, 'courierAdded'), {
+      reply_markup: getAdminMenuKeyboard(userId)
+    });
+  }
 }
 
 // Show all orders (admin function)
@@ -1322,6 +1712,165 @@ function showAllOrders(chatId, userId) {
 }
 
 
+
+// Show all couriers (admin function)
+function showAllCouriers(chatId, userId) {
+  const courierIds = Object.keys(couriers);
+  
+  if (courierIds.length === 0) {
+    bot.sendMessage(chatId, t(userId, 'noCouriersAvailable'), {
+      reply_markup: getAdminMenuKeyboard(userId)
+    });
+    return;
+  }
+
+  let couriersMessage = `${t(userId, 'couriersList')}:\n\n`;
+  
+  courierIds.forEach(id => {
+    const courier = couriers[id];
+    couriersMessage += `👤 ID: ${courier.userId}\n`;
+    if (courier.name) couriersMessage += `Name: ${courier.name}\n`;
+    if (courier.username) couriersMessage += `@${courier.username}\n`;
+    couriersMessage += `${t(userId, 'addedBy')}: ${courier.addedBy}\n`;
+    couriersMessage += `───────────\n`;
+  });
+
+  bot.sendMessage(chatId, couriersMessage, {
+    reply_markup: getAdminMenuKeyboard(userId)
+  });
+}
+
+// Get courier removal keyboard
+function getCourierRemovalKeyboard() {
+  const courierIds = Object.keys(couriers);
+  
+  if (courierIds.length === 0) {
+    return null;
+  }
+  
+  const keyboard = courierIds.map(id => ([{
+    text: `${couriers[id].name || couriers[id].username || couriers[id].userId}`,
+    callback_data: `remove_courier_${id}`
+  }]));
+  
+  return {
+    inline_keyboard: keyboard
+  };
+}
+
+// Show available orders (courier function)
+function showAvailableOrders(chatId, userId) {
+  const availableOrders = orders.filter(order => order.status === 'pending');
+  
+  if (availableOrders.length === 0) {
+    bot.sendMessage(chatId, t(userId, 'noAvailableOrders'), {
+      reply_markup: getCourierMenuKeyboard(userId)
+    });
+    return;
+  }
+
+  let ordersMessage = `${t(userId, 'availableOrders')}:\n\n`;
+  
+  availableOrders.forEach(order => {
+    ordersMessage += `${t(userId, 'orderNumber')}${order.orderId}\n`;
+    ordersMessage += `👤 ${order.userName}\n`;
+    ordersMessage += `📦 ${order.product}\n`;
+    ordersMessage += `📍 ${order.address}\n`;
+    ordersMessage += `🕐 ${order.time}\n`;
+    ordersMessage += `${t(userId, 'status')}: ${t(userId, 'orderStatusPending')}\n`;
+    ordersMessage += `───────────\n`;
+  });
+
+  // Create buttons for taking orders
+  const keyboard = availableOrders.map(order => ([{
+    text: `${t(userId, 'takeOrder')} #${order.orderId}`,
+    callback_data: `take_order_${order.orderId}`
+  }]));
+
+  bot.sendMessage(chatId, ordersMessage, {
+    reply_markup: { inline_keyboard: keyboard }
+  });
+}
+
+// Show courier's assigned orders
+function showCourierOrders(chatId, userId) {
+  const courierOrders = orders.filter(order => order.courierId === userId);
+  
+  if (courierOrders.length === 0) {
+    bot.sendMessage(chatId, t(userId, 'noAssignedOrders'), {
+      reply_markup: getCourierMenuKeyboard(userId)
+    });
+    return;
+  }
+
+  let ordersMessage = `${t(userId, 'myOrders')}:\n\n`;
+  
+  courierOrders.forEach(order => {
+    ordersMessage += `${t(userId, 'orderNumber')}${order.orderId}\n`;
+    ordersMessage += `👤 ${order.userName}\n`;
+    ordersMessage += `📦 ${order.product}\n`;
+    ordersMessage += `📍 ${order.address}\n`;
+    ordersMessage += `🕐 ${order.time}\n`;
+    
+    let statusText = t(userId, 'orderStatusPending');
+    if (order.status === 'in_progress') statusText = t(userId, 'orderStatusInProgress');
+    if (order.status === 'completed') statusText = t(userId, 'orderStatusCompleted');
+    ordersMessage += `${t(userId, 'status')}: ${statusText}\n`;
+    
+    if (order.customerNotes) {
+      ordersMessage += `${t(userId, 'customerNotes')}: ${order.customerNotes}\n`;
+    }
+    ordersMessage += `───────────\n`;
+  });
+
+  // Create action buttons for each order
+  const keyboard = [];
+  courierOrders.forEach(order => {
+    if (order.status !== 'completed') {
+      keyboard.push([{
+        text: `${t(userId, 'updateStatus')} #${order.orderId}`,
+        callback_data: `update_status_${order.orderId}`
+      }]);
+    }
+    keyboard.push([{
+      text: `${t(userId, 'addCustomerNote')} #${order.orderId}`,
+      callback_data: `add_note_${order.orderId}`
+    }]);
+  });
+
+  bot.sendMessage(chatId, ordersMessage, {
+    reply_markup: { inline_keyboard: keyboard }
+  });
+}
+
+// Handle courier input
+function handleCourierInput(chatId, userId, text) {
+  if (!courierStates[userId]) {
+    return;
+  }
+
+  const state = courierStates[userId];
+
+  if (state.action === 'add_customer_note') {
+    const order = orders.find(o => o.orderId === state.orderId);
+    if (!order) {
+      bot.sendMessage(chatId, 'Order not found.');
+      delete courierStates[userId];
+      return;
+    }
+
+    // Add customer note
+    order.customerNotes = text.trim();
+    order.updatedAt = new Date().toISOString();
+    saveOrders();
+
+    delete courierStates[userId];
+
+    bot.sendMessage(chatId, t(userId, 'customerNoteAdded'), {
+      reply_markup: getCourierMenuKeyboard(userId)
+    });
+  }
+}
 
 // Handle polling errors
 bot.on('polling_error', (error) => {
