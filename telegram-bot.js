@@ -19,11 +19,13 @@ const bot = new TelegramBot(token, { polling: true });
 const usersFilePath = path.join(__dirname, 'users.json');
 const productsFilePath = path.join(__dirname, 'products.json');
 const ordersFilePath = path.join(__dirname, 'orders.json');
+const categoriesFilePath = path.join(__dirname, 'categories.json');
 
 // Initialize storage
 let users = {};
 let products = [];
 let orders = [];
+let categories = [];
 
 // Admin user IDs (add your Telegram user ID here)
 const ADMIN_IDS = process.env.ADMIN_IDS ? process.env.ADMIN_IDS.split(',').map(id => parseInt(id.trim())) : [];
@@ -46,6 +48,7 @@ const translations = {
     menuMyInfo: '👤 My Info',
     menuLanguage: '🌐 Language',
     menuPlaceOrder: '🛒 Place Order',
+    menuViewProducts: '📦 View Products',
     menuCancel: '❌ Cancel',
     name: 'Name',
     language: 'Language',
@@ -53,6 +56,12 @@ const translations = {
     registered: 'Registered',
     userId: 'User ID',
     selectProduct: 'Please select a product:',
+    selectProductToView: 'Select a product to view details:',
+    productDetails: '📦 Product Details',
+    description: 'Description',
+    price: 'Price',
+    viewProductsTitle: '📦 Available Products',
+    backToMenu: '⬅️ Back to Menu',
     enterAddress: 'Please enter delivery address:',
     enterTime: 'Please enter delivery time (e.g., 14:00 or 2:00 PM):',
     orderPlaced: '✅ Order placed successfully!',
@@ -73,10 +82,31 @@ const translations = {
     adminViewOrders: '📋 View Orders',
     adminBackToMain: '⬅️ Back to Main Menu',
     enterProductName: 'Enter product name:',
+    enterProductDescription: 'Enter product description:',
+    enterProductPrice: 'Enter product price (or skip with /skip):',
+    enterProductPhoto: 'Send product photo (or skip with /skip):',
+    enterProductCategory: 'Enter product category:',
     productAdded: '✅ Product added successfully!',
     productRemoved: '✅ Product removed successfully!',
     selectProductToRemove: 'Select product to remove:',
-    noProductsToRemove: 'No products to remove.'
+    noProductsToRemove: 'No products to remove.',
+    addingProductStep1: 'Step 1/5: Product name',
+    addingProductStep2: 'Step 2/5: Product description',
+    addingProductStep3: 'Step 3/5: Product price',
+    addingProductStep4: 'Step 4/5: Product photo',
+    addingProductStep5: 'Step 5/5: Product category',
+    category: 'Category',
+    photo: 'Photo',
+    adminManageCategories: '📂 Manage Categories',
+    adminAddCategory: '➕ Add Category',
+    adminRemoveCategory: '➖ Remove Category',
+    enterCategoryName: 'Enter category name:',
+    categoryAdded: '✅ Category added successfully!',
+    categoryRemoved: '✅ Category removed successfully!',
+    selectCategory: 'Select category:',
+    selectCategoryToRemove: 'Select category to remove:',
+    noCategoriesAvailable: 'No categories available.',
+    viewByCategory: 'View by category'
   },
   ru: {
     welcome: '👋 Добро пожаловать в Бот Заказов!\n\nПожалуйста, выберите язык:',
@@ -94,6 +124,7 @@ const translations = {
     menuMyInfo: '👤 Моя информация',
     menuLanguage: '🌐 Язык',
     menuPlaceOrder: '🛒 Оформить заказ',
+    menuViewProducts: '📦 Просмотр товаров',
     menuCancel: '❌ Отмена',
     name: 'Имя',
     language: 'Язык',
@@ -101,6 +132,12 @@ const translations = {
     registered: 'Зарегистрирован',
     userId: 'ID пользователя',
     selectProduct: 'Пожалуйста, выберите товар:',
+    selectProductToView: 'Выберите товар для просмотра:',
+    productDetails: '📦 Информация о товаре',
+    description: 'Описание',
+    price: 'Цена',
+    viewProductsTitle: '📦 Доступные товары',
+    backToMenu: '⬅️ Вернуться в меню',
     enterAddress: 'Пожалуйста, введите адрес доставки:',
     enterTime: 'Пожалуйста, введите время доставки (например, 14:00 или 2:00 PM):',
     orderPlaced: '✅ Заказ успешно оформлен!',
@@ -121,10 +158,31 @@ const translations = {
     adminViewOrders: '📋 Просмотр заказов',
     adminBackToMain: '⬅️ Назад в главное меню',
     enterProductName: 'Введите название товара:',
+    enterProductDescription: 'Введите описание товара:',
+    enterProductPrice: 'Введите цену товара (или пропустите командой /skip):',
+    enterProductPhoto: 'Отправьте фото товара (или пропустите командой /skip):',
+    enterProductCategory: 'Введите категорию товара:',
     productAdded: '✅ Товар успешно добавлен!',
     productRemoved: '✅ Товар успешно удален!',
     selectProductToRemove: 'Выберите товар для удаления:',
-    noProductsToRemove: 'Нет товаров для удаления.'
+    noProductsToRemove: 'Нет товаров для удаления.',
+    addingProductStep1: 'Шаг 1/5: Название товара',
+    addingProductStep2: 'Шаг 2/5: Описание товара',
+    addingProductStep3: 'Шаг 3/5: Цена товара',
+    addingProductStep4: 'Шаг 4/5: Фото товара',
+    addingProductStep5: 'Шаг 5/5: Категория товара',
+    category: 'Категория',
+    photo: 'Фото',
+    adminManageCategories: '📂 Управление категориями',
+    adminAddCategory: '➕ Добавить категорию',
+    adminRemoveCategory: '➖ Удалить категорию',
+    enterCategoryName: 'Введите название категории:',
+    categoryAdded: '✅ Категория успешно добавлена!',
+    categoryRemoved: '✅ Категория успешно удалена!',
+    selectCategory: 'Выберите категорию:',
+    selectCategoryToRemove: 'Выберите категорию для удаления:',
+    noCategoriesAvailable: 'Категории отсутствуют.',
+    viewByCategory: 'Просмотр по категориям'
   },
   et: {
     welcome: '👋 Tere tulemast tellimuste botti!\n\nPalun valige keel:',
@@ -142,6 +200,7 @@ const translations = {
     menuMyInfo: '👤 Minu info',
     menuLanguage: '🌐 Keel',
     menuPlaceOrder: '🛒 Tee tellimus',
+    menuViewProducts: '📦 Vaata tooteid',
     menuCancel: '❌ Tühista',
     name: 'Nimi',
     language: 'Keel',
@@ -149,6 +208,12 @@ const translations = {
     registered: 'Registreeritud',
     userId: 'Kasutaja ID',
     selectProduct: 'Palun valige toode:',
+    selectProductToView: 'Valige toode üksikasjade vaatamiseks:',
+    productDetails: '📦 Toote üksikasjad',
+    description: 'Kirjeldus',
+    price: 'Hind',
+    viewProductsTitle: '📦 Saadaolevad tooted',
+    backToMenu: '⬅️ Tagasi menüüsse',
     enterAddress: 'Palun sisestage tarneaadress:',
     enterTime: 'Palun sisestage tarneaeg (nt 14:00 või 2:00 PM):',
     orderPlaced: '✅ Tellimus edukalt esitatud!',
@@ -169,10 +234,31 @@ const translations = {
     adminViewOrders: '📋 Vaata tellimusi',
     adminBackToMain: '⬅️ Tagasi peamenüüsse',
     enterProductName: 'Sisestage toote nimi:',
+    enterProductDescription: 'Sisestage toote kirjeldus:',
+    enterProductPrice: 'Sisestage toote hind (või jätke vahele käsuga /skip):',
+    enterProductPhoto: 'Saatke toote foto (või jätke vahele käsuga /skip):',
+    enterProductCategory: 'Sisestage toote kategooria:',
     productAdded: '✅ Toode edukalt lisatud!',
     productRemoved: '✅ Toode edukalt eemaldatud!',
     selectProductToRemove: 'Valige eemaldatav toode:',
-    noProductsToRemove: 'Pole tooteid eemaldamiseks.'
+    noProductsToRemove: 'Pole tooteid eemaldamiseks.',
+    addingProductStep1: 'Samm 1/5: Toote nimi',
+    addingProductStep2: 'Samm 2/5: Toote kirjeldus',
+    addingProductStep3: 'Samm 3/5: Toote hind',
+    addingProductStep4: 'Samm 4/5: Toote foto',
+    addingProductStep5: 'Samm 5/5: Toote kategooria',
+    category: 'Kategooria',
+    photo: 'Foto',
+    adminManageCategories: '📂 Halda kategooriaid',
+    adminAddCategory: '➕ Lisa kategooria',
+    adminRemoveCategory: '➖ Eemalda kategooria',
+    enterCategoryName: 'Sisestage kategooria nimi:',
+    categoryAdded: '✅ Kategooria edukalt lisatud!',
+    categoryRemoved: '✅ Kategooria edukalt eemaldatud!',
+    selectCategory: 'Valige kategooria:',
+    selectCategoryToRemove: 'Valige eemaldatav kategooria:',
+    noCategoriesAvailable: 'Kategooriaid pole saadaval.',
+    viewByCategory: 'Vaata kategooriate kaupa'
   }
 };
 
@@ -250,6 +336,29 @@ function saveOrders() {
   }
 }
 
+// Load categories from file
+function loadCategories() {
+  try {
+    if (fs.existsSync(categoriesFilePath)) {
+      const data = fs.readFileSync(categoriesFilePath, 'utf8');
+      categories = JSON.parse(data);
+      console.log('Loaded categories:', categories.length);
+    }
+  } catch (error) {
+    console.error('Error loading categories:', error.message);
+    categories = [];
+  }
+}
+
+// Save categories to file
+function saveCategories() {
+  try {
+    fs.writeFileSync(categoriesFilePath, JSON.stringify(categories, null, 2));
+  } catch (error) {
+    console.error('Error saving categories:', error.message);
+  }
+}
+
 // Check if user is admin
 function isAdmin(userId) {
   return ADMIN_IDS.includes(userId);
@@ -270,6 +379,7 @@ function t(userId, key) {
 loadUsers();
 loadProducts();
 loadOrders();
+loadCategories();
 
 // Store registration state for each user
 const registrationStates = {};
@@ -286,6 +396,8 @@ function getMainMenuKeyboard(userId) {
     keyboard.push([{ text: translations[lang].menuMyInfo }]);
   }
   
+  // View Products button available for everyone
+  keyboard.push([{ text: translations[lang].menuViewProducts }]);
   keyboard.push([{ text: translations[lang].menuLanguage }]);
   
   if (isAdmin(userId)) {
@@ -305,6 +417,7 @@ function getAdminMenuKeyboard(userId) {
     keyboard: [
       [{ text: translations[lang].adminAddProduct }],
       [{ text: translations[lang].adminRemoveProduct }],
+      [{ text: translations[lang].adminManageCategories }],
       [{ text: translations[lang].adminViewOrders }],
       [{ text: translations[lang].adminBackToMain }]
     ],
@@ -371,6 +484,81 @@ function getProductRemovalKeyboard() {
   };
 }
 
+// Create product viewing keyboard (for extended view)
+function getProductViewKeyboard(userId, categoryFilter = null) {
+  let filteredProducts = products;
+  
+  if (categoryFilter) {
+    filteredProducts = products.filter(p => p.category === categoryFilter);
+  }
+  
+  if (filteredProducts.length === 0) {
+    return null;
+  }
+  
+  const buttons = filteredProducts.map((product) => {
+    const productIndex = products.indexOf(product);
+    const displayName = product.price ? `${product.name} - ${product.price}` : product.name;
+    return [{ text: displayName, callback_data: `view_product_${productIndex}` }];
+  });
+  
+  // Add back button
+  buttons.push([{ text: t(userId, 'backToMenu'), callback_data: 'back_to_menu' }]);
+  
+  return {
+    inline_keyboard: buttons
+  };
+}
+
+// Create category selection keyboard
+function getCategoryKeyboard(userId) {
+  if (categories.length === 0) {
+    return null;
+  }
+  
+  const buttons = categories.map((category, index) => {
+    return [{ text: category.name, callback_data: `category_${index}` }];
+  });
+  
+  // Add "All products" option
+  buttons.unshift([{ text: '📦 All Products', callback_data: 'category_all' }]);
+  buttons.push([{ text: t(userId, 'backToMenu'), callback_data: 'back_to_menu' }]);
+  
+  return {
+    inline_keyboard: buttons
+  };
+}
+
+// Create category selection keyboard for adding product
+function getCategoryKeyboardForProduct() {
+  if (categories.length === 0) {
+    return null;
+  }
+  
+  const buttons = categories.map((category, index) => {
+    return [{ text: category.name, callback_data: `select_category_${index}` }];
+  });
+  
+  return {
+    inline_keyboard: buttons
+  };
+}
+
+// Create category removal keyboard for admin
+function getCategoryRemovalKeyboard() {
+  if (categories.length === 0) {
+    return null;
+  }
+  
+  const buttons = categories.map((category, index) => {
+    return [{ text: `❌ ${category.name}`, callback_data: `remove_category_${index}` }];
+  });
+  
+  return {
+    inline_keyboard: buttons
+  };
+}
+
 // Command: /start
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
@@ -422,6 +610,62 @@ bot.on('callback_query', (query) => {
       bot.sendMessage(chatId, t(userId, 'enterAddress'));
     }
   }
+  // Handle category selection for viewing products
+  else if (data.startsWith('category_')) {
+    bot.answerCallbackQuery(query.id);
+    
+    if (data === 'category_all') {
+      // Show all products
+      bot.sendMessage(chatId, t(userId, 'selectProductToView'), {
+        reply_markup: getProductViewKeyboard(userId)
+      });
+    } else {
+      const categoryIndex = parseInt(data.split('_')[1]);
+      if (categories[categoryIndex]) {
+        const categoryName = categories[categoryIndex].name;
+        bot.sendMessage(chatId, `${t(userId, 'category')}: ${categoryName}`, {
+          reply_markup: getProductViewKeyboard(userId, categoryName)
+        });
+      }
+    }
+  }
+  // Handle product viewing (extended view)
+  else if (data.startsWith('view_product_')) {
+    const productIndex = parseInt(data.split('_')[2]);
+    
+    if (products[productIndex]) {
+      const product = products[productIndex];
+      const productInfo = `
+${t(userId, 'productDetails')}
+
+📦 ${t(userId, 'name')}: ${product.name}
+${product.description ? `📝 ${t(userId, 'description')}: ${product.description}` : ''}
+${product.price ? `💰 ${t(userId, 'price')}: ${product.price}` : ''}
+${product.category ? `📂 ${t(userId, 'category')}: ${product.category}` : ''}
+      `.trim();
+      
+      bot.answerCallbackQuery(query.id);
+      
+      // If product has photo, send with photo
+      if (product.photoId) {
+        bot.sendPhoto(chatId, product.photoId, {
+          caption: productInfo,
+          reply_markup: getProductViewKeyboard(userId)
+        });
+      } else {
+        bot.sendMessage(chatId, productInfo, {
+          reply_markup: getProductViewKeyboard(userId)
+        });
+      }
+    }
+  }
+  // Handle back to menu button
+  else if (data === 'back_to_menu') {
+    bot.answerCallbackQuery(query.id);
+    bot.sendMessage(chatId, t(userId, 'languageSelected'), {
+      reply_markup: getMainMenuKeyboard(userId)
+    });
+  }
   // Handle product removal by admin
   else if (data.startsWith('remove_product_')) {
     if (!isAdmin(userId)) {
@@ -444,6 +688,62 @@ bot.on('callback_query', (query) => {
       delete adminStates[userId];
     }
   }
+  // Handle category selection when adding product
+  else if (data.startsWith('select_category_')) {
+    if (!isAdmin(userId) || !adminStates[userId]) {
+      bot.answerCallbackQuery(query.id, { text: 'Access denied' });
+      return;
+    }
+    
+    const categoryIndex = parseInt(data.split('_')[2]);
+    
+    if (categories[categoryIndex]) {
+      adminStates[userId].productData.category = categories[categoryIndex].name;
+      
+      // Create the product
+      const productData = adminStates[userId].productData;
+      const product = {
+        id: products.length + 1,
+        name: productData.name,
+        description: productData.description || '',
+        price: productData.price || '',
+        category: productData.category,
+        photoId: productData.photoId || null,
+        addedAt: new Date().toISOString()
+      };
+      
+      products.push(product);
+      saveProducts();
+      
+      delete adminStates[userId];
+      
+      bot.answerCallbackQuery(query.id);
+      bot.sendMessage(chatId, t(userId, 'productAdded'), {
+        reply_markup: getAdminMenuKeyboard(userId)
+      });
+    }
+  }
+  // Handle category removal by admin
+  else if (data.startsWith('remove_category_')) {
+    if (!isAdmin(userId)) {
+      bot.answerCallbackQuery(query.id, { text: 'Access denied' });
+      return;
+    }
+    
+    const categoryIndex = parseInt(data.split('_')[2]);
+    
+    if (categories[categoryIndex]) {
+      categories.splice(categoryIndex, 1);
+      saveCategories();
+      
+      bot.answerCallbackQuery(query.id);
+      bot.sendMessage(chatId, t(userId, 'categoryRemoved'), {
+        reply_markup: getAdminMenuKeyboard(userId)
+      });
+      
+      delete adminStates[userId];
+    }
+  }
 });
 
 // Handle menu button presses
@@ -451,11 +751,49 @@ bot.on('message', (msg) => {
   const chatId = msg.chat.id;
   const userId = msg.from.id;
   const text = msg.text;
+  
+  // Handle photos for product addition
+  if (msg.photo && adminStates[userId] && adminStates[userId].action === 'add_product' && adminStates[userId].step === 'photo') {
+    const photo = msg.photo[msg.photo.length - 1]; // Get highest resolution
+    adminStates[userId].productData.photoId = photo.file_id;
+    adminStates[userId].step = 'category';
+    
+    if (categories.length > 0) {
+      bot.sendMessage(chatId, `${t(userId, 'addingProductStep5')}\n${t(userId, 'selectCategory')}`, {
+        reply_markup: getCategoryKeyboardForProduct()
+      });
+    } else {
+      bot.sendMessage(chatId, t(userId, 'noCategoriesAvailable') + '\n' + t(userId, 'enterCategoryName'));
+    }
+    return;
+  }
 
   if (!text) return;
 
+  // Handle /skip command for admin adding products
+  if (text === '/skip' && adminStates[userId] && adminStates[userId].action === 'add_product') {
+    const state = adminStates[userId];
+    
+    if (state.step === 'price') {
+      // Skip price, move to photo
+      state.step = 'photo';
+      bot.sendMessage(chatId, `${t(userId, 'addingProductStep4')}\n${t(userId, 'enterProductPhoto')}`);
+    } else if (state.step === 'photo') {
+      // Skip photo, move to category
+      state.step = 'category';
+      if (categories.length > 0) {
+        bot.sendMessage(chatId, `${t(userId, 'addingProductStep5')}\n${t(userId, 'selectCategory')}`, {
+          reply_markup: getCategoryKeyboardForProduct()
+        });
+      } else {
+        bot.sendMessage(chatId, t(userId, 'noCategoriesAvailable') + '\n' + t(userId, 'enterCategoryName'));
+      }
+    }
+    return;
+  }
+  
   // Skip if message is a command
-  if (text.startsWith('/')) {
+  if (text && text.startsWith('/')) {
     return;
   }
 
@@ -472,6 +810,9 @@ bot.on('message', (msg) => {
     bot.sendMessage(chatId, t(userId, 'welcome'), {
       reply_markup: getLanguageKeyboard()
     });
+    return;
+  } else if (text === translations[lang].menuViewProducts) {
+    showProductsView(chatId, userId);
     return;
   } else if (text === translations[lang].menuPlaceOrder) {
     startOrder(chatId, userId);
@@ -499,6 +840,39 @@ bot.on('message', (msg) => {
         });
       } else {
         bot.sendMessage(chatId, t(userId, 'noProductsToRemove'), {
+          reply_markup: getAdminMenuKeyboard(userId)
+        });
+      }
+    }
+    return;
+  } else if (text === translations[lang].adminManageCategories) {
+    if (isAdmin(userId)) {
+      // Show category management sub-menu
+      bot.sendMessage(chatId, t(userId, 'adminManageCategories'), {
+        keyboard: [
+          [{ text: translations[lang].adminAddCategory }],
+          [{ text: translations[lang].adminRemoveCategory }],
+          [{ text: translations[lang].adminBackToMain }]
+        ],
+        resize_keyboard: true
+      });
+    }
+    return;
+  } else if (text === translations[lang].adminAddCategory) {
+    if (isAdmin(userId)) {
+      adminStates[userId] = { action: 'add_category' };
+      bot.sendMessage(chatId, t(userId, 'enterCategoryName'));
+    }
+    return;
+  } else if (text === translations[lang].adminRemoveCategory) {
+    if (isAdmin(userId)) {
+      const keyboard = getCategoryRemovalKeyboard();
+      if (keyboard) {
+        bot.sendMessage(chatId, t(userId, 'selectCategoryToRemove'), {
+          reply_markup: keyboard
+        });
+      } else {
+        bot.sendMessage(chatId, t(userId, 'noCategoriesAvailable'), {
           reply_markup: getAdminMenuKeyboard(userId)
         });
       }
@@ -597,6 +971,28 @@ ${t(userId, 'myInfo')}
   bot.sendMessage(chatId, infoMessage, {
     reply_markup: getMainMenuKeyboard(userId)
   });
+}
+
+// Show products view (with categories)
+function showProductsView(chatId, userId) {
+  if (products.length === 0) {
+    bot.sendMessage(chatId, t(userId, 'noProducts'), {
+      reply_markup: getMainMenuKeyboard(userId)
+    });
+    return;
+  }
+
+  // If categories exist, show category selection first
+  if (categories.length > 0) {
+    bot.sendMessage(chatId, t(userId, 'selectCategory'), {
+      reply_markup: getCategoryKeyboard(userId)
+    });
+  } else {
+    // Show all products without category filter
+    bot.sendMessage(chatId, t(userId, 'selectProductToView'), {
+      reply_markup: getProductViewKeyboard(userId)
+    });
+  }
 }
 
 // Handle registration input
@@ -750,24 +1146,86 @@ function handleAdminInput(chatId, userId, text) {
   const state = adminStates[userId];
 
   if (state.action === 'add_product') {
-    // Validate product name
+    if (!state.step) {
+      // Step 1: Product name
+      if (!text || text.trim().length < 2) {
+        bot.sendMessage(chatId, 'Product name must be at least 2 characters.');
+        return;
+      }
+      
+      state.productData = { name: text.trim() };
+      state.step = 'description';
+      bot.sendMessage(chatId, `${t(userId, 'addingProductStep2')}\n${t(userId, 'enterProductDescription')}`);
+    }
+    else if (state.step === 'description') {
+      // Step 2: Description
+      state.productData.description = text.trim();
+      state.step = 'price';
+      bot.sendMessage(chatId, `${t(userId, 'addingProductStep3')}\n${t(userId, 'enterProductPrice')}`);
+    }
+    else if (state.step === 'price') {
+      // Step 3: Price
+      state.productData.price = text.trim();
+      state.step = 'photo';
+      bot.sendMessage(chatId, `${t(userId, 'addingProductStep4')}\n${t(userId, 'enterProductPhoto')}`);
+    }
+    else if (state.step === 'category') {
+      // Step 5: Category (if categories don't exist, admin types it)
+      if (categories.length === 0) {
+        const categoryName = text.trim();
+        state.productData.category = categoryName;
+        
+        // Add category if it doesn't exist
+        if (!categories.find(c => c.name === categoryName)) {
+          categories.push({
+            id: categories.length + 1,
+            name: categoryName,
+            addedAt: new Date().toISOString()
+          });
+          saveCategories();
+        }
+        
+        // Create the product
+        const product = {
+          id: products.length + 1,
+          name: state.productData.name,
+          description: state.productData.description || '',
+          price: state.productData.price || '',
+          category: state.productData.category,
+          photoId: state.productData.photoId || null,
+          addedAt: new Date().toISOString()
+        };
+        
+        products.push(product);
+        saveProducts();
+        
+        delete adminStates[userId];
+        
+        bot.sendMessage(chatId, t(userId, 'productAdded'), {
+          reply_markup: getAdminMenuKeyboard(userId)
+        });
+      }
+    }
+  }
+  else if (state.action === 'add_category') {
+    // Validate category name
     if (!text || text.trim().length < 2) {
-      bot.sendMessage(chatId, 'Product name must be at least 2 characters.');
+      bot.sendMessage(chatId, 'Category name must be at least 2 characters.');
       return;
     }
-
-    const product = {
-      id: products.length + 1,
+    
+    const category = {
+      id: categories.length + 1,
       name: text.trim(),
       addedAt: new Date().toISOString()
     };
-
-    products.push(product);
-    saveProducts();
-
+    
+    categories.push(category);
+    saveCategories();
+    
     delete adminStates[userId];
-
-    bot.sendMessage(chatId, t(userId, 'productAdded'), {
+    
+    bot.sendMessage(chatId, t(userId, 'categoryAdded'), {
       reply_markup: getAdminMenuKeyboard(userId)
     });
   }

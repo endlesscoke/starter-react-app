@@ -23,6 +23,7 @@
 users.json
 products.json
 orders.json
+categories.json
 
 npm-debug.log*
 yarn-debug.log*
