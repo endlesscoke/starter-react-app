@@ -16,6 +16,26 @@ const translations = {
     menuAdminPanel: '🔧 Admin Menu',
     menuCourierPanel: '🚚 Courier Menu',
     
+    // Registration
+    alreadyRegistered: 'You are already registered!',
+    notRegistered: 'Please register first using the Register button',
+    registrationComplete: '✅ Registration complete!',
+    registered: 'Registered',
+    selectLanguage: 'Please select your language:',
+    selectRegion: 'Please select your region:',
+    enterName: 'Please enter your nickname:',
+    invalidName: 'Invalid nickname. Please try again.',
+    regionSelected: 'Region selected',
+    language: 'Language',
+    name: 'Name',
+    region: 'Region',
+    myInfo: 'My Info',
+    blacklisted: '🚫 You are blacklisted and cannot use this bot.',
+    
+    // Menus
+    adminMenu: '🔧 Admin Menu',
+    courierMenu: '🚚 Courier Menu',
+    
     // Cart
     myCart: '🛍️ My Cart',
     cartEmpty: 'Your cart is empty',
@@ -58,6 +78,26 @@ const translations = {
     menuAdminPanel: '🔧 Админ панель',
     menuCourierPanel: '🚚 Меню курьера',
     
+    // Registration
+    alreadyRegistered: 'Вы уже зарегистрированы!',
+    notRegistered: 'Пожалуйста, сначала зарегистрируйтесь',
+    registrationComplete: '✅ Регистрация завершена!',
+    registered: 'Зарегистрирован',
+    selectLanguage: 'Пожалуйста, выберите язык:',
+    selectRegion: 'Пожалуйста, выберите регион:',
+    enterName: 'Пожалуйста, введите ваш ник:',
+    invalidName: 'Неверный ник. Попробуйте снова.',
+    regionSelected: 'Регион выбран',
+    language: 'Язык',
+    name: 'Имя',
+    region: 'Регион',
+    myInfo: 'Моя информация',
+    blacklisted: '🚫 Вы находитесь в черном списке и не можете использовать бота.',
+    
+    // Menus
+    adminMenu: '🔧 Админ панель',
+    courierMenu: '🚚 Меню курьера',
+    
     // Cart
     myCart: '🛍️ Моя корзина',
     cartEmpty: 'Ваша корзина пуста',
@@ -99,6 +139,26 @@ const translations = {
     menuMyCart: '🛍️ Minu ostukorv',
     menuAdminPanel: '🔧 Admin menüü',
     menuCourierPanel: '🚚 Kulleri menüü',
+    
+    // Registration
+    alreadyRegistered: 'Olete juba registreeritud!',
+    notRegistered: 'Palun registreerige esmalt',
+    registrationComplete: '✅ Registreerimine lõpetatud!',
+    registered: 'Registreeritud',
+    selectLanguage: 'Palun valige keel:',
+    selectRegion: 'Palun valige piirkond:',
+    enterName: 'Palun sisestage oma hüüdnimi:',
+    invalidName: 'Vigane hüüdnimi. Proovige uuesti.',
+    regionSelected: 'Piirkond valitud',
+    language: 'Keel',
+    name: 'Nimi',
+    region: 'Piirkond',
+    myInfo: 'Minu info',
+    blacklisted: '🚫 Olete mustas nimekirjas ja ei saa botti kasutada.',
+    
+    // Menus
+    adminMenu: '🔧 Admin menüü',
+    courierMenu: '🚚 Kulleri menüü',
     
     // Cart
     myCart: '🛍️ Minu ostukorv',
