@@ -469,6 +469,24 @@ function getProductKeyboard(userId) {
   };
 }
 
+// Create product keyboard filtered by category for ordering
+function getProductKeyboardByCategory(userId, categoryName) {
+  const filteredProducts = products.filter(p => p.category === categoryName);
+  
+  if (filteredProducts.length === 0) {
+    return null;
+  }
+  
+  const buttons = filteredProducts.map((product) => {
+    const productIndex = products.indexOf(product);
+    return [{ text: product.name, callback_data: `product_${productIndex}` }];
+  });
+  
+  return {
+    inline_keyboard: buttons
+  };
+}
+
 // Create product removal keyboard for admin
 function getProductRemovalKeyboard() {
   if (products.length === 0) {
@@ -559,6 +577,24 @@ function getCategoryRemovalKeyboard() {
   };
 }
 
+// Create category selection keyboard for ordering
+function getCategoryKeyboardForOrder(userId) {
+  if (categories.length === 0) {
+    return null;
+  }
+  
+  const buttons = categories.map((category, index) => {
+    return [{ text: category.name, callback_data: `order_category_${index}` }];
+  });
+  
+  // Add "All products" option
+  buttons.unshift([{ text: '📦 All Products', callback_data: 'order_category_all' }]);
+  
+  return {
+    inline_keyboard: buttons
+  };
+}
+
 // Command: /start
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
@@ -611,7 +647,7 @@ bot.on('callback_query', (query) => {
     }
   }
   // Handle category selection for viewing products
-  else if (data.startsWith('category_')) {
+  else if (data.startsWith('category_') && !data.startsWith('order_category_')) {
     bot.answerCallbackQuery(query.id);
     
     if (data === 'category_all') {
@@ -625,6 +661,25 @@ bot.on('callback_query', (query) => {
         const categoryName = categories[categoryIndex].name;
         bot.sendMessage(chatId, `${t(userId, 'category')}: ${categoryName}`, {
           reply_markup: getProductViewKeyboard(userId, categoryName)
+        });
+      }
+    }
+  }
+  // Handle category selection for ordering
+  else if (data.startsWith('order_category_')) {
+    bot.answerCallbackQuery(query.id);
+    
+    if (data === 'order_category_all') {
+      // Show all products for ordering
+      bot.sendMessage(chatId, t(userId, 'selectProduct'), {
+        reply_markup: getProductKeyboard(userId)
+      });
+    } else {
+      const categoryIndex = parseInt(data.split('_')[2]);
+      if (categories[categoryIndex]) {
+        const categoryName = categories[categoryIndex].name;
+        bot.sendMessage(chatId, `${t(userId, 'category')}: ${categoryName}\n${t(userId, 'selectProduct')}`, {
+          reply_markup: getProductKeyboardByCategory(userId, categoryName)
         });
       }
     }
@@ -1070,10 +1125,17 @@ function startOrder(chatId, userId) {
     data: {}
   };
 
-  // Show product selection
-  bot.sendMessage(chatId, t(userId, 'selectProduct'), {
-    reply_markup: getProductKeyboard(userId)
-  });
+  // If categories exist, show category selection first
+  if (categories.length > 0) {
+    bot.sendMessage(chatId, t(userId, 'selectCategory'), {
+      reply_markup: getCategoryKeyboardForOrder(userId)
+    });
+  } else {
+    // Show product selection directly if no categories
+    bot.sendMessage(chatId, t(userId, 'selectProduct'), {
+      reply_markup: getProductKeyboard(userId)
+    });
+  }
 }
 
 // Handle order input
