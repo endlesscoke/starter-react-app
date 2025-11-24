@@ -260,6 +260,120 @@ bot.on('message', async (msg) => {
     });
     return;
   }
+  
+  // Browse & Order (Catalog)
+  if (text === t(userId, 'menuBrowseOrder') || text === '🛒 Catalog & Order' || text === '🛒 Каталог и заказ' || text === '🛒 Kataloog ja tellimus') {
+    if (!users[userId]) {
+      bot.sendMessage(chatId, t(userId, 'notRegistered'));
+      return;
+    }
+    
+    // Show categories
+    const buttons = [];
+    categories.forEach(cat => {
+      buttons.push([{ text: cat, callback_data: `category_${cat}` }]);
+    });
+    buttons.push([{ text: t(userId, 'allProducts'), callback_data: 'category_all' }]);
+    buttons.push([{ text: '🔙 ' + t(userId, 'back'), callback_data: 'main_menu' }]);
+    
+    bot.sendMessage(chatId, t(userId, 'selectCategory'), {
+      reply_markup: { inline_keyboard: buttons }
+    });
+    return;
+  }
+  
+  // My Cart
+  if (text === t(userId, 'menuMyCart') || text === '🛍️ My Cart' || text === '🛍️ Моя корзина' || text === '🛍️ Minu ostukorv') {
+    if (!users[userId]) {
+      bot.sendMessage(chatId, t(userId, 'notRegistered'));
+      return;
+    }
+    
+    const cart = carts[userId] || {};
+    const cartItems = Object.keys(cart);
+    
+    if (cartItems.length === 0) {
+      bot.sendMessage(chatId, t(userId, 'emptyCart'), {
+        reply_markup: getMainMenuKeyboard(userId)
+      });
+      return;
+    }
+    
+    let cartText = `🛍️ ${t(userId, 'myCart')}:\n\n`;
+    let total = 0;
+    
+    cartItems.forEach(productId => {
+      const item = cart[productId];
+      const product = products[productId];
+      if (product) {
+        const itemTotal = product.price * item.quantity;
+        total += itemTotal;
+        cartText += `📦 ${product.name}\n`;
+        cartText += `   ${item.quantity} x ${product.price.toFixed(2)} EUR = ${itemTotal.toFixed(2)} EUR\n\n`;
+      }
+    });
+    
+    cartText += `\n💰 ${t(userId, 'total')}: ${total.toFixed(2)} EUR`;
+    
+    const buttons = [];
+    cartItems.forEach(productId => {
+      const product = products[productId];
+      if (product) {
+        buttons.push([{ text: `➖ ${product.name}`, callback_data: `remove_from_cart_${productId}` }]);
+      }
+    });
+    buttons.push([{ text: '🗑️ ' + t(userId, 'clearCart'), callback_data: 'clear_cart' }]);
+    buttons.push([{ text: '✅ ' + t(userId, 'checkout'), callback_data: 'checkout' }]);
+    buttons.push([{ text: '🔙 ' + t(userId, 'back'), callback_data: 'main_menu' }]);
+    
+    bot.sendMessage(chatId, cartText, {
+      reply_markup: { inline_keyboard: buttons }
+    });
+    return;
+  }
+  
+  // Admin Panel
+  if (text === t(userId, 'adminMenu') || text === '🔧 Admin Panel' || text === '🔧 Админ панель' || text === '🔧 Admin paneel') {
+    if (!isAdmin(userId)) {
+      bot.sendMessage(chatId, '❌ Access denied');
+      return;
+    }
+    
+    const buttons = [
+      [{ text: '📦 ' + t(userId, 'manageProducts'), callback_data: 'admin_products' }],
+      [{ text: '📂 ' + t(userId, 'manageCategories'), callback_data: 'admin_categories' }],
+      [{ text: '🚚 ' + t(userId, 'manageCouriers'), callback_data: 'admin_couriers' }],
+      [{ text: '📋 ' + t(userId, 'viewOrders'), callback_data: 'admin_orders' }],
+      [{ text: '💰 ' + t(userId, 'manageDiscounts'), callback_data: 'admin_discounts' }],
+      [{ text: '👤 ' + t(userId, 'viewUsers'), callback_data: 'admin_users' }],
+      [{ text: '🚫 ' + t(userId, 'manageBlacklist'), callback_data: 'admin_blacklist' }],
+      [{ text: '🔙 ' + t(userId, 'back'), callback_data: 'main_menu' }]
+    ];
+    
+    bot.sendMessage(chatId, '🔧 ' + t(userId, 'adminMenu'), {
+      reply_markup: { inline_keyboard: buttons }
+    });
+    return;
+  }
+  
+  // Courier Panel
+  if (text === t(userId, 'courierMenu') || text === '🚚 Courier Panel' || text === '🚚 Панель курьера' || text === '🚚 Kullerile') {
+    if (!isCourier(userId)) {
+      bot.sendMessage(chatId, '❌ Access denied');
+      return;
+    }
+    
+    const buttons = [
+      [{ text: '📦 ' + t(userId, 'availableOrders'), callback_data: 'courier_available' }],
+      [{ text: '🚚 ' + t(userId, 'myOrders'), callback_data: 'courier_my_orders' }],
+      [{ text: '🔙 ' + t(userId, 'back'), callback_data: 'main_menu' }]
+    ];
+    
+    bot.sendMessage(chatId, '🚚 ' + t(userId, 'courierMenu'), {
+      reply_markup: { inline_keyboard: buttons }
+    });
+    return;
+  }
 });
 
 // Error handling

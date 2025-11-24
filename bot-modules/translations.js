@@ -63,6 +63,20 @@ const translations = {
     selectUser: 'Select user',
     confirmDelete: '⚠️ Confirm deletion?',
     userDeleted: '✅ User deleted',
+    
+    // Additional keys
+    back: 'Back',
+    emptyCart: 'Your cart is empty',
+    total: 'Total',
+    selectCategory: 'Select a category:',
+    allProducts: 'All Products',
+    manageProducts: 'Manage Products',
+    manageCategories: 'Manage Categories',
+    manageCouriers: 'Manage Couriers',
+    viewOrders: 'View Orders',
+    manageBlacklist: 'Manage Blacklist',
+    availableOrders: 'Available Orders',
+    myOrders: 'My Orders',
   },
   ru: {
     // General
@@ -127,6 +141,20 @@ const translations = {
     selectUser: 'Выберите пользователя',
     confirmDelete: '⚠️ Подтвердить удаление?',
     userDeleted: '✅ Пользователь удален',
+    
+    // Additional keys
+    back: 'Назад',
+    emptyCart: 'Ваша корзина пуста',
+    total: 'Итого',
+    selectCategory: 'Выберите категорию:',
+    allProducts: 'Все товары',
+    manageProducts: 'Управление товарами',
+    manageCategories: 'Управление категориями',
+    manageCouriers: 'Управление курьерами',
+    viewOrders: 'Просмотр заказов',
+    manageBlacklist: 'Управление черным списком',
+    availableOrders: 'Доступные заказы',
+    myOrders: 'Мои заказы',
   },
   et: {
     // General
@@ -191,6 +219,20 @@ const translations = {
     selectUser: 'Vali kasutaja',
     confirmDelete: '⚠️ Kinnita kustutamine?',
     userDeleted: '✅ Kasutaja kustutatud',
+    
+    // Additional keys
+    back: 'Tagasi',
+    emptyCart: 'Teie ostukorv on tühi',
+    total: 'Kokku',
+    selectCategory: 'Valige kategooria:',
+    allProducts: 'Kõik tooted',
+    manageProducts: 'Halda tooteid',
+    manageCategories: 'Halda kategooriaid',
+    manageCouriers: 'Halda kullereid',
+    viewOrders: 'Vaata tellimusi',
+    manageBlacklist: 'Halda musta nimekirja',
+    availableOrders: 'Saadaolevad tellimused',
+    myOrders: 'Minu tellimused',
   }
 };
 
