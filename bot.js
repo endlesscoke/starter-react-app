@@ -15,7 +15,6 @@ const bot = new TelegramBot(token, { polling: true });
 // In-memory storage (in production, use a database)
 const users = new Map();
 const orders = new Map();
-const couriers = new Map();
 let orderIdCounter = 1;
 
 // User roles
@@ -147,7 +146,6 @@ bot.onText(/\/register_courier/, (msg) => {
   };
   
   users.set(chatId, courierData);
-  couriers.set(chatId, courierData);
   
   bot.sendMessage(chatId, `✅ Регистрация успешна!\n\nВы зарегистрированы как курьер.\n\nИспользуйте /available_orders чтобы посмотреть доступные заказы.`);
 });
@@ -210,8 +208,10 @@ bot.onText(/\/neworder/, (msg) => {
     bot.sendMessage(chatId, `✅ Заказ #${orderId} создан!\n\n📦 Детали: ${orderDetails}\n📊 Статус: Ожидает курьера\n\nВы можете посмотреть ваши заказы: /myorders`);
     
     // Notify all couriers about new order
-    couriers.forEach((courier, courierId) => {
-      bot.sendMessage(courierId, `🔔 Новый заказ #${orderId}!\n\n📦 ${orderDetails}\n\nИспользуйте /available_orders чтобы посмотреть все доступные заказы.`);
+    users.forEach((user, userId) => {
+      if (user.role === ROLES.COURIER) {
+        bot.sendMessage(userId, `🔔 Новый заказ #${orderId}!\n\n📦 ${orderDetails}\n\nИспользуйте /available_orders чтобы посмотреть все доступные заказы.`);
+      }
     });
   });
 });
@@ -290,7 +290,13 @@ bot.onText(/\/cancelorder/, (msg) => {
   bot.sendMessage(chatId, message);
   
   bot.onReplyToMessage(chatId, msg.message_id, (reply) => {
-    const orderId = parseInt(reply.text);
+    const orderId = parseInt(reply.text, 10);
+    
+    if (isNaN(orderId)) {
+      bot.sendMessage(chatId, '❌ Пожалуйста, введите корректный номер заказа.');
+      return;
+    }
+    
     const order = orders.get(orderId);
     
     if (!order || order.userId !== chatId) {
@@ -368,7 +374,13 @@ bot.onText(/\/accept_order/, (msg) => {
   bot.sendMessage(chatId, '🔢 Введите номер заказа:');
   
   bot.onReplyToMessage(chatId, msg.message_id, (reply) => {
-    const orderId = parseInt(reply.text);
+    const orderId = parseInt(reply.text, 10);
+    
+    if (isNaN(orderId)) {
+      bot.sendMessage(chatId, '❌ Пожалуйста, введите корректный номер заказа.');
+      return;
+    }
+    
     const order = orders.get(orderId);
     
     if (!order) {
@@ -454,7 +466,13 @@ bot.onText(/\/complete_order/, (msg) => {
   bot.sendMessage(chatId, '🔢 Введите номер заказа для завершения:');
   
   bot.onReplyToMessage(chatId, msg.message_id, (reply) => {
-    const orderId = parseInt(reply.text);
+    const orderId = parseInt(reply.text, 10);
+    
+    if (isNaN(orderId)) {
+      bot.sendMessage(chatId, '❌ Пожалуйста, введите корректный номер заказа.');
+      return;
+    }
+    
     const order = orders.get(orderId);
     
     if (!order || order.courierId !== chatId) {
@@ -499,5 +517,5 @@ bot.on('polling_error', (error) => {
 
 console.log('🤖 Telegram bot is running...');
 console.log('📊 Registered users:', users.size);
-console.log('🚗 Registered couriers:', couriers.size);
+console.log('🚗 Registered couriers:', Array.from(users.values()).filter(u => u.role === ROLES.COURIER).length);
 console.log('📦 Active orders:', orders.size);
