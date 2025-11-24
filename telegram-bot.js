@@ -151,7 +151,7 @@ bot.on('callback_query', async (query) => {
     if (userStates[userId]) {
       userStates[userId].region = region;
       bot.answerCallbackQuery(query.id);
-      bot.sendMessage(chatId, t(userId, 'regionSelected'));
+      bot.sendMessage(chatId, t(userId, 'enterName'));
       userStates[userId].step = 'enter_name';
     }
     return;
