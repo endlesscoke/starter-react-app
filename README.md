@@ -63,6 +63,7 @@ The Telegram bot includes:
 
 - **User Guide (Russian)**: [BOT_USAGE_RU.md](./BOT_USAGE_RU.md) - Detailed instructions for users and couriers
 - **Developer Guide**: [BOT_DEVELOPMENT.md](./BOT_DEVELOPMENT.md) - Architecture, setup, and extension guide
+- **Workflow Diagrams**: [BOT_WORKFLOW.md](./BOT_WORKFLOW.md) - Visual workflows and data flow diagrams
 
 ## Available Scripts
 
