@@ -59,6 +59,11 @@ The Telegram bot includes:
 - `/my_deliveries` - View your active deliveries
 - `/complete_order` - Mark an order as delivered
 
+### Documentation
+
+- **User Guide (Russian)**: [BOT_USAGE_RU.md](./BOT_USAGE_RU.md) - Detailed instructions for users and couriers
+- **Developer Guide**: [BOT_DEVELOPMENT.md](./BOT_DEVELOPMENT.md) - Architecture, setup, and extension guide
+
 ## Available Scripts
 
 In the project directory, you can run:
