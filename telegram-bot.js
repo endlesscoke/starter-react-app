@@ -3,7 +3,7 @@ const TelegramBot = require('node-telegram-bot-api');
 
 // Import all modules
 const storage = require('./bot-modules/storage');
-const translations = require('./bot-modules/translations');
+const { translations } = require('./bot-modules/translations');
 const userModule = require('./bot-modules/users');
 const blacklistModule = require('./bot-modules/blacklist');
 const courierModule = require('./bot-modules/couriers');
