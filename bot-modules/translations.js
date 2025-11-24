@@ -2,6 +2,7 @@
 const translations = {
   en: {
     // General
+    welcome: 'Welcome! Please select your language:',
     backToMenu: '⬅️ Back to Main Menu',
     cancel: '❌ Cancel',
     
@@ -64,6 +65,7 @@ const translations = {
   },
   ru: {
     // General
+    welcome: 'Добро пожаловать! Пожалуйста, выберите язык:',
     backToMenu: '⬅️ Назад в меню',
     cancel: '❌ Отмена',
     
@@ -126,6 +128,7 @@ const translations = {
   },
   et: {
     // General
+    welcome: 'Tere tulemast! Palun valige keel:',
     backToMenu: '⬅️ Tagasi menüüsse',
     cancel: '❌ Tühista',
     
