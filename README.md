@@ -1,8 +1,69 @@
 [![Deploy to Cyclic](https://deploy.cyclic.app/button.svg)](https://deploy.cyclic.app/)
 
-# Getting Started with Create React App
+# Starter React App with Telegram Bot
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app) and includes a Telegram bot for order management system.
+
+## 🤖 Telegram Bot Features
+
+The Telegram bot includes:
+- **User Registration System**: Users and couriers can register with different roles
+- **Order Management**: Users can create, view, and cancel orders
+- **Courier System**: Couriers can view available orders, accept them, and mark as delivered
+- **Real-time Notifications**: Automated notifications for order updates
+
+### Setting Up the Telegram Bot
+
+1. **Create a Telegram Bot**:
+   - Open Telegram and search for [@BotFather](https://t.me/botfather)
+   - Send `/newbot` command
+   - Follow the instructions to create your bot
+   - Copy the bot token you receive
+
+2. **Configure the Bot**:
+   ```bash
+   # Copy the example environment file
+   cp .env.example .env
+   
+   # Edit .env and add your bot token
+   # TELEGRAM_BOT_TOKEN=your_bot_token_here
+   ```
+
+3. **Install Dependencies**:
+   ```bash
+   npm install
+   ```
+
+4. **Start the Bot**:
+   ```bash
+   node bot.js
+   ```
+
+### Bot Commands
+
+#### For All Users:
+- `/start` - Start the bot and see welcome message
+- `/help` - Show all available commands
+- `/register` - Register as a user
+- `/register_courier` - Register as a courier
+- `/myinfo` - View your registration information
+
+#### For Users:
+- `/neworder` - Create a new order
+- `/myorders` - View all your orders
+- `/cancelorder` - Cancel an active order
+
+#### For Couriers:
+- `/available_orders` - View all pending orders
+- `/accept_order` - Accept an order for delivery
+- `/my_deliveries` - View your active deliveries
+- `/complete_order` - Mark an order as delivered
+
+### Documentation
+
+- **User Guide (Russian)**: [BOT_USAGE_RU.md](./BOT_USAGE_RU.md) - Detailed instructions for users and couriers
+- **Developer Guide**: [BOT_DEVELOPMENT.md](./BOT_DEVELOPMENT.md) - Architecture, setup, and extension guide
+- **Workflow Diagrams**: [BOT_WORKFLOW.md](./BOT_WORKFLOW.md) - Visual workflows and data flow diagrams
 
 ## Available Scripts
 

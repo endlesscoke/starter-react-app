@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node server.js",
+    "bot": "node bot.js",
     "dev": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
@@ -28,7 +29,8 @@
     ]
   },
   "dependencies": {
-    "express": "^4.17.3"
+    "express": "^4.17.3",
+    "node-telegram-bot-api": "^0.66.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^5.16.2",
